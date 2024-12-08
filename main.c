@@ -568,7 +568,7 @@ int main()
                     }
                     printf("  a b c d e f g h\n");
                     printf("%s\n", red(str));
-                    printf("%s:%s$ ", green("animesh@chess"), blue("~"));
+                    printf("%s:%s$ ", green("a7md@chess"), blue("~"));
 
                     char cmd[1000];
                     snprintf(cmd, sizeof(cmd), "python3 ai.py \"%s\"", req);
