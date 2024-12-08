@@ -55,8 +55,8 @@ To compile this project, ensure the following are installed on your Linux system
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/a7mddra/Chess
-   cd Chess
+   git clone https://github.com/a7mddra/ChessGUI.git
+   cd ChessGUI
    ```
 
 2. **Run Makefile**
