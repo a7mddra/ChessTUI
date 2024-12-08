@@ -397,7 +397,9 @@ int main()
         }*/
         printf("%s\n", red(str));
         char *user = getenv("USER");
-        printf("%s%s:%s$ ", green(user), green("@chess"), blue("~"));
+        char ch[256];
+        snprintf(ch, sizeof(ch), "%s@chess", user);
+        printf("%s:%s$ ", green(ch), blue("~"));
 
         input_len = 0;
         while (!gameover)
