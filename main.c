@@ -468,7 +468,7 @@ int main()
                     if (strcmp(board[row][col], "♔") == 0 && !kmoved)
                     {
                         // Queen side castling
-                        if (board[7][1] == "·" && board[7][2] == "·" && board[7][3] == blue("•") && !lrmoved)
+                        if (strcmp(board[7][1], "·") == 0 && strcmp(board[7][2], "·") == 0 && strcmp(board[7][3], blue("•")) == 0 && !lrmoved)
                         {
                             if (!underAttack(tmp, 7, 4) && !underAttack(tmp, 7, 3) && !underAttack(tmp, 7, 2))
                             {
@@ -477,7 +477,7 @@ int main()
                         }
 
                         // King side castling
-                        if (board[7][5] == blue("•") && board[7][6] == "·" && !rrmoved)
+                        if (strcmp(board[7][5], blue("•")) && strcmp(board[7][6] ,"·") && !rrmoved)
                         {
                             if (!underAttack(tmp, 7, 4) && !underAttack(tmp, 7, 5) && !underAttack(tmp, 7, 6))
                             {
@@ -568,7 +568,7 @@ int main()
                     }
                     printf("  a b c d e f g h\n");
                     printf("%s\n", red(str));
-                    printf("%s:%s$ ", green("a7md@chess"), blue("~"));
+                    printf("%s:%s$ ", green("animesh@chess"), blue("~"));
 
                     char cmd[1000];
                     snprintf(cmd, sizeof(cmd), "python3 ai.py \"%s\"", req);
@@ -578,7 +578,7 @@ int main()
                     {
 
                         fgets(aiplay, sizeof(aiplay), fp);
-                        fclose(fp);
+                        pclose(fp);
                         strcpy(memory[cnt], aiplay);
                         
                     }

@@ -3,8 +3,8 @@ import os
 import chess
 import chess.engine
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
-stockfish_path = os.path.join(script_dir, "stockfish/src/stockfish")
+script_dir = os.path.dirname(__file__)
+stockfish_path = os.path.join(script_dir, "stockfish/stockfish-ubuntu-x86-64-avx2")
 
 engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 board = chess.Board()

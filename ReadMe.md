@@ -60,7 +60,7 @@ To run this project, ensure the following are installed on your Linux system:
 
 2. **Compile the C Code**
    ```bash
-   gcc main.c -o chess_game
+   gcc main.c terminal/termios.c terminal/colors.c -o chess_game
    ```
 
 3. **Run the Game**
