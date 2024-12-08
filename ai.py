@@ -3,6 +3,12 @@ import os
 import chess
 import chess.engine
 
+'''''
+Download the Stockfish binary from Stockfish's official site.
+Place it in the CHESS directory or you can update path to it here.
+"stockfish/src/stockfish" => "stockfish/stockfish-ubuntu-x86-64-avx2"
+'''''
+
 script_dir = os.path.dirname(os.path.realpath(__file__))
 stockfish_path = os.path.join(script_dir, "stockfish/src/stockfish")
 

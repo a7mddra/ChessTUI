@@ -30,7 +30,7 @@ It features real-time board updates, color-coded text, and seamless interaction 
 
 ## **Prerequisites**
 
-To run this project, ensure the following are installed on your Linux system:
+To compile this project, ensure the following are installed on your Linux system:
 
 1. **Chess Library for Python**  
    Install via pip:  
@@ -40,7 +40,8 @@ To run this project, ensure the following are installed on your Linux system:
 
 2. **Stockfish Engine**  
    Download the Stockfish binary from [Stockfish's official site](https://stockfishchess.org/download/).  
-   Place it in the `stockfish/src` directory.
+   Once downloaded, place it in the same directory where you cloned the repository. If you'd prefer to keep it elsewhere, make sure to update the path to the Stockfish binary in the AI.py file."
+
 
 3. **C Compiler**  
    GCC is required to compile the C code:  
@@ -54,13 +55,13 @@ To run this project, ensure the following are installed on your Linux system:
 
 1. **Clone the Repository**
    ```bash
-   git clone <[repository-link](https://github.com/a7mddra/Chess)>
-   cd <Chess>
+   git clone https://github.com/a7mddra/Chess
+   cd Chess
    ```
 
-2. **Compile the C Code**
+2. **Run Makefile**
    ```bash
-   gcc main.c -o chess_game
+   make
    ```
 
 3. **Run the Game**
@@ -135,8 +136,12 @@ Thinking...
 
 ---
 
-## **Contributions**
+## **Demo**
 
-Feel free to fork the project, suggest improvements, or report bugs. Contributions are welcome!
+You can check out a demo of the chess game in action by visiting this [LinkedIn post](https://www.linkedin.com/posts/a7mddra_i-made-chess-in-terminal-using-c-hundreds-activity-7270785844255342592-MBoo?utm_source=share&utm_medium=member_desktop).
+
+In the post, I showcase how the chess game runs in the terminal, highlighting the AI's moves and the player's interaction with the game using Standard Algebraic Notation.
+
+Feel free to take a look at the video to see the game in real-time!
 
 ---
