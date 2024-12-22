@@ -4,7 +4,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
-#include "terminal/terminal_utils.h"
+#include "lib/colors.h"
+
+#define clear() printf("\033[H\033[2J")
 
 void copy(const char *src[8][8], const char *dest[8][8])
 {
@@ -17,24 +19,27 @@ void copy(const char *src[8][8], const char *dest[8][8])
     }
 }
 
+bool cmp(const char *__s1, const char *__s2) {
+    return strcmp(__s1, __s2) == 0;
+}
+
 int type(const char *board[8][8], int x, int y)
 {
     if (
-        strcmp(board[x][y], "♜") == 0 || strcmp(board[x][y], "♞") == 0 ||
-        strcmp(board[x][y], "♝") == 0 || strcmp(board[x][y], "♛") == 0 ||
-        strcmp(board[x][y], "♚") == 0 || strcmp(board[x][y], "♟") == 0)
+        cmp(board[x][y], "♜") || cmp(board[x][y], "♞") ||
+        cmp(board[x][y], "♝") || cmp(board[x][y], "♛") ||
+        cmp(board[x][y], "♚") || cmp(board[x][y], "♟"))
     {
         return 0;
     }
     else if (
-        strcmp(board[x][y], "♖") == 0 || strcmp(board[x][y], "♘") == 0 ||
-        strcmp(board[x][y], "♗") == 0 || strcmp(board[x][y], "♕") == 0 ||
-        strcmp(board[x][y], "♔") == 0 || strcmp(board[x][y], "♙") == 0)
+        cmp(board[x][y], "♖") || cmp(board[x][y], "♘") ||
+        cmp(board[x][y], "♗") || cmp(board[x][y], "♕") ||
+        cmp(board[x][y], "♔") || cmp(board[x][y], "♙"))
     {
         return 1;
     }
-    else if (
-        strcmp(board[x][y], "·") == 0)
+    else if (cmp(board[x][y], "·"))
     {
         return 3;
     }
@@ -44,19 +49,18 @@ int type(const char *board[8][8], int x, int y)
     }
 }
 
-void kill(const char *board[8][8], int x, int y)
+void attack(const char *board[8][8], int x, int y)
 {
-    if (
-        type(board, x, y) == 0)
+    if (type(board, x, y) == 0)
     {
-        board[x][y] = red(board[x][y]);
+        board[x][y] = red(0, board[x][y]);
     }
 }
 
 int pos(char *move)
 {
     int row = 8 - move[1] + '0';
-    int col = move[0] - 'a';
+    int col = 0 + move[0] - 'a';
     return row * 8 + col;
 }
 
@@ -69,34 +73,36 @@ void mark(const char *board[8][8], int x, int y)
 {
 
     // Pawn
-    if (strcmp(board[x][y], "♙") == 0)
+    if (cmp(board[x][y], "♙"))
     {
         int f = 0;
-        if (strcmp(board[x - 1][y], "·") == 0 && x - 1 >= 0)
+        if (cmp(board[x - 1][y], "·") && x - 1 >= 0)
         {
-            board[x - 1][y] = blue("•");
+            board[x - 1][y] = blue(0, "•");
             f = 1;
         }
-        if (strcmp(board[4][y], "·") == 0 && f == 1 && x == 6)
+        if (cmp(board[4][y], "·") && f == 1 && x == 6)
         {
-            board[4][y] = blue("•");
+            board[4][y] = blue(0, "•");
         }
 
         if (x - 1 >= 0 && y - 1 >= 0)
         {
-            kill(board, x - 1, y - 1);
+            attack(board, x - 1, y - 1);
         }
         if (x - 1 >= 0 && y + 1 < 8)
         {
-            kill(board, x - 1, y + 1);
+            attack(board, x - 1, y + 1);
         }
     }
 
     // Knight
-    if (strcmp(board[x][y], "♘") == 0)
+    if (cmp(board[x][y], "♘"))
     {
         int moves[8][2] = {
-            {2, 1}, {2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {-2, 1}, {-2, -1}};
+            { 2, 1}, { 2, -1}, { 1, 2}, { 1, -2},
+            {-1, 2}, {-1, -2}, {-2, 1}, {-2, -1}
+        };
 
         for (int i = 0; i < 8; i++)
         {
@@ -105,23 +111,24 @@ void mark(const char *board[8][8], int x, int y)
 
             if (bounds(nx, ny))
             {
-                if (strcmp(board[nx][ny], "·") == 0)
+                if (cmp(board[nx][ny], "·"))
                 {
-                    board[nx][ny] = blue("•");
+                    board[nx][ny] = blue(0, "•");
                 }
                 else
                 {
-                    kill(board, nx, ny);
+                    attack(board, nx, ny);
                 }
             }
         }
     }
 
     // Rook
-    if (strcmp(board[x][y], "♖") == 0)
+    if (cmp(board[x][y], "♖"))
     {
         int dir[4][2] = {
-            {0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+            {0, 1}, {0, -1}, {1, 0}, {-1, 0}
+        };
 
         for (int d = 0; d < 4; d++)
         {
@@ -133,13 +140,13 @@ void mark(const char *board[8][8], int x, int y)
 
             while (bounds(nx, ny))
             {
-                if (strcmp(board[nx][ny], "·") == 0)
+                if (cmp(board[nx][ny], "·"))
                 {
-                    board[nx][ny] = blue("•");
+                    board[nx][ny] = blue(0, "•");
                 }
                 else
                 {
-                    kill(board, nx, ny);
+                    attack(board, nx, ny);
                     break;
                 }
                 nx += dx;
@@ -149,10 +156,11 @@ void mark(const char *board[8][8], int x, int y)
     }
 
     // Bishop
-    if (strcmp(board[x][y], "♗") == 0)
+    if (cmp(board[x][y], "♗"))
     {
         int dir[4][2] = {
-            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+        };
 
         for (int d = 0; d < 4; d++)
         {
@@ -164,13 +172,13 @@ void mark(const char *board[8][8], int x, int y)
 
             while (bounds(nx, ny))
             {
-                if (strcmp(board[nx][ny], "·") == 0)
+                if (cmp(board[nx][ny], "·"))
                 {
-                    board[nx][ny] = blue("•");
+                    board[nx][ny] = blue(0, "•");
                 }
                 else
                 {
-                    kill(board, nx, ny);
+                    attack(board, nx, ny);
                     break;
                 }
                 nx += dx;
@@ -180,10 +188,12 @@ void mark(const char *board[8][8], int x, int y)
     }
 
     // Queen
-    if (strcmp(board[x][y], "♕") == 0)
+    if (cmp(board[x][y], "♕"))
     {
         int dir[8][2] = {
-            {0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+            {0, 1}, {0, -1}, { 1, 0}, {-1,  0},
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+        };
 
         for (int d = 0; d < 8; d++)
         {
@@ -195,13 +205,13 @@ void mark(const char *board[8][8], int x, int y)
 
             while (bounds(nx, ny))
             {
-                if (strcmp(board[nx][ny], "·") == 0)
+                if (cmp(board[nx][ny], "·"))
                 {
-                    board[nx][ny] = blue("•");
+                    board[nx][ny] = blue(0, "•");
                 }
                 else
                 {
-                    kill(board, nx, ny);
+                    attack(board, nx, ny);
                     break;
                 }
                 nx += dx;
@@ -211,11 +221,13 @@ void mark(const char *board[8][8], int x, int y)
     }
 
     // King
-    if (strcmp(board[x][y], "♔") == 0)
+    if (cmp(board[x][y], "♔"))
     {
 
         int dir[8][2] = {
-            {0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+            {0, 1}, {0, -1}, { 1, 0}, {-1,  0},
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+        };
 
         for (int d = 0; d < 8; d++)
         {
@@ -227,13 +239,13 @@ void mark(const char *board[8][8], int x, int y)
 
             if (bounds(nx, ny))
             {
-                if (strcmp(board[nx][ny], "·") == 0)
+                if (cmp(board[nx][ny], "·"))
                 {
-                    board[nx][ny] = blue("•");
+                    board[nx][ny] = blue(0, "•");
                 }
                 else
                 {
-                    kill(board, nx, ny);
+                    attack(board, nx, ny);
                 }
             }
         }
@@ -243,35 +255,41 @@ void mark(const char *board[8][8], int x, int y)
 int enPassant(const char *board[8][8], int x, int y, int airf, int airt, int aicf, int aict)
 {
     int rt = 3;
-    if (y - 1 == aict && x == airt && strcmp(board[x][y - 1], "♟") == 0 && abs(airf - airt) == 2)
+    if (y - 1 == aict && x == airt
+        && cmp(board[x][y - 1], "♟")
+        && abs(airf - airt) == 2)
     {
-        board[x - 1][y - 1] = blue("•");
+        board[x - 1][y - 1] = blue(0, "•");
         rt = 0;
     }
 
-    if (y + 1 == aict && x == airt && strcmp(board[x][y + 1], "♟") == 0 && abs(airf - airt) == 2)
+    if (y + 1 == aict && x == airt
+        && cmp(board[x][y + 1], "♟")
+        && abs(airf - airt) == 2)
     {
-        board[x - 1][y + 1] = blue("•");
+        board[x - 1][y + 1] = blue(0, "•");
         rt = 1;
     }
 
     return rt;
 }
 
-bool underAttack(const char *board[8][8], int x, int y)
+bool uAttack(const char *board[8][8], int x, int y)
 {
 
-    int pawn[2][2] = {{-1, 1}, {-1, -1}};
+    int pawn[2][2]   = {{-1, 1}, {-1, -1}                      };
 
-    int knight[8][2] = {{1, 2}, {2, 1}, {-2, -1}, {-1, -2}, {-1, 2}, {1, -2}, {-2, 1}, {2, -1}};
+    int knight[8][2] = {{ 1, 2}, { 2,  1}, {-2, -1}, {-1, -2},
+                        {-1, 2}, { 1, -2}, {-2,  1}, { 2, -1}  };
 
-    int dir[8][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
+    int dir[8][2]    = {{ 1, 0}, {-1,  0}, { 0,  1}, { 0, -1},
+                        { 1, 1}, {-1, -1}, { 1, -1}, {-1,  1}  };
 
     for (int i = 0; i < 2; i++)
     {
         int nx = x + pawn[i][0];
         int ny = y + pawn[i][1];
-        if (bounds(nx, ny) && (strcmp(board[nx][ny], "♟") == 0))
+        if (bounds(nx, ny) && cmp(board[nx][ny], "♟"))
         {
             return true;
         }
@@ -281,7 +299,7 @@ bool underAttack(const char *board[8][8], int x, int y)
     {
         int nx = x + knight[i][0];
         int ny = y + knight[i][1];
-        if (bounds(nx, ny) && strcmp(board[nx][ny], "♞") == 0)
+        if (bounds(nx, ny) && cmp(board[nx][ny], "♞"))
         {
             return true;
         }
@@ -295,15 +313,18 @@ bool underAttack(const char *board[8][8], int x, int y)
 
         while (bounds(nx, ny))
         {
-            if (strcmp(board[nx][ny], "·") == 0 || strcmp(board[nx][ny], blue("•")) == 0)
+            if (cmp(board[nx][ny],         "·" )
+            ||  cmp(board[nx][ny], blue(0, "•")))
             {
                 nx += dx;
                 ny += dy;
                 continue;
             }
 
-            if ((i < 4 && (strcmp(board[nx][ny], "♜") == 0 || strcmp(board[nx][ny], "♛") == 0)) ||
-                (i >= 4 && (strcmp(board[nx][ny], "♝") == 0 || strcmp(board[nx][ny], "♛") == 0)))
+            if ((i <  4 && (cmp(board[nx][ny], "♜")
+            ||              cmp(board[nx][ny], "♛")))
+            ||  (i >= 4 && (cmp(board[nx][ny], "♝")
+            ||              cmp(board[nx][ny], "♛"))))
             {
                 return true;
             }
@@ -318,7 +339,7 @@ bool underAttack(const char *board[8][8], int x, int y)
             if (dx == 0 && dy == 0)
                 continue;
             int nx = x + dx, ny = y + dy;
-            if (bounds(nx, ny) && strcmp(board[nx][ny], "♚") == 0)
+            if (bounds(nx, ny) && cmp(board[nx][ny], "♚"))
             {
                 return true;
             }
@@ -358,16 +379,15 @@ int main()
     int try = 0, rnd = 0, cnt = 0;
     int nr, nc, ep = 3;
     int airf = 1, aicf = 3, airt = 3, aict = 3;
-    bool kmoved = false;
+    bool kmoved  = false;
     bool lrmoved = false;
     bool rrmoved = false;
-    bool myturn = true;
-    bool isprmt = false;
-    bool gameover = false;
+    bool isprmt  = false;
+    bool myturn  = true;
 
-    raw_mode();
+
     str[0] = '\0';
-    clear_screen();
+    clear();
     for (int i = 0; i < 1000; i++) {
         for (int j = 0; j < 6; j++) {
             memory[i][j] = '\0';
@@ -376,7 +396,7 @@ int main()
     while (1)
     {
 
-        clear_screen();
+        clear();
         for (int i = 0; i < 8; i++)
         {
             printf("%d ", 8 - i);
@@ -395,14 +415,14 @@ int main()
             }
             printf(", ");
         }*/
-        printf("%s\n", red(str));
+        printf("%s\n", red(0, str));
         char *user = getenv("USER");
         char ch[256];
         snprintf(ch, sizeof(ch), "%s@chess", user);
-        printf("%s:%s$ ", green(ch), blue("~"));
+        printf("%s:%s$ ", green(0, ch), blue(0, "~"));
 
         input_len = 0;
-        while (!gameover)
+        while (1)
         {
             char c = getchar();
 
@@ -422,22 +442,22 @@ int main()
 
         if (strlen(input) == 1 && isprmt)
         {
-            if (strcmp(input, "r") == 0)
+            if (cmp(input, "r"))
             {
                 tmp[nr][nc] = "♖";
                 board[nr][nc] = "♖";
             }
-            else if (strcmp(input, "n") == 0)
+            else if (cmp(input, "n"))
             {
                 tmp[nr][nc] = "♘";
                 board[nr][nc] = "♘";
             }
-            else if (strcmp(input, "b") == 0)
+            else if (cmp(input, "b"))
             {
                 tmp[nr][nc] = "♗";
                 board[nr][nc] = "♗";
             }
-            else if (strcmp(input, "q") == 0)
+            else if (cmp(input, "q"))
             {
                 tmp[nr][nc] = "♕";
                 board[nr][nc] = "♕";
@@ -468,28 +488,28 @@ int main()
                     strcpy(curr, move);
 
                     // King Castling
-                    if (strcmp(board[row][col], "♔") == 0 && !kmoved)
+                    if (cmp(board[row][col], "♔") && !kmoved)
                     {
                         // Queen side castling
-                        if (strcmp(board[7][1], "·") == 0 && strcmp(board[7][2], "·") == 0 && strcmp(board[7][3], blue("•")) == 0 && !lrmoved)
+                        if (cmp(board[7][1], "·") && cmp(board[7][2], "·") && cmp(board[7][3], blue(0, "•")) && !lrmoved)
                         {
-                            if (!underAttack(tmp, 7, 4) && !underAttack(tmp, 7, 3) && !underAttack(tmp, 7, 2))
+                            if (!uAttack(tmp, 7, 4) && !uAttack(tmp, 7, 3) && !uAttack(tmp, 7, 2))
                             {
-                                board[7][2] = blue("•");
+                                board[7][2] = blue(0, "•");
                             }
                         }
 
                         // King side castling
-                        if (strcmp(board[7][5], blue("•"))== 0 && strcmp(board[7][6] ,"·") == 0 && !rrmoved)
+                        if (cmp(board[7][5], blue(0, "•")) && cmp(board[7][6] ,"·") && !rrmoved)
                         {
-                            if (!underAttack(tmp, 7, 4) && !underAttack(tmp, 7, 5) && !underAttack(tmp, 7, 6))
+                            if (!uAttack(tmp, 7, 4) && !uAttack(tmp, 7, 5) && !uAttack(tmp, 7, 6))
                             {
-                                board[7][6] = blue("•");
+                                board[7][6] = blue(0, "•");
                             }
                         }
                     }
                     // En Passant
-                    if (strcmp(board[row][col], "♙") == 0 && row == 3)
+                    if (cmp(board[row][col], "♙") && row == 3)
                     {
                         ep = enPassant(board, row, col, airf, airt, aicf, aict);
                     }
@@ -520,32 +540,32 @@ int main()
 
                     rnd++;
                     // Pawn Promotion
-                    if (strcmp(board[r][c], "♙") == 0 && row == 0)
+                    if (cmp(board[r][c], "♙") && row == 0)
                     {
                         strcpy(str, "Promote as [r / n / b / q]");
                         isprmt = true;
                     }
                     // king Castling
-                    if (strcmp(board[r][c], "♔") == 0)
+                    if (cmp(board[r][c], "♔"))
                     {
                         kmoved = true;
                     }
-                    if (strcmp(board[r][c], "♖") == 0 && c == 0)
+                    if (cmp(board[r][c], "♖") && c == 0)
                     {
                         lrmoved = true;
                     }
-                    if (strcmp(board[r][c], "♖") == 0 && c == 7)
+                    if (cmp(board[r][c], "♖") && c == 7)
                     {
                         rrmoved = true;
                     }
                     // king side
-                    if (row == 7 && col == 6 && strcmp(board[r][c], "♔") == 0)
+                    if (row == 7 && col == 6 && cmp(board[r][c], "♔"))
                     {
                         tmp[row][7] = "·";
                         tmp[row][5] = "♖";
                     }
                     // queen side
-                    if (row == 7 && col == 2 && strcmp(board[r][c], "♔") == 0)
+                    if (row == 7 && col == 2 && cmp(board[r][c], "♔"))
                     {
                         tmp[row][0] = "·";
                         tmp[row][3] = "♖";
@@ -559,7 +579,7 @@ int main()
                     {
                         tmp[row - 1][col] = "·";
                     }
-                    clear_screen();
+                    clear();
                     for (int i = 0; i < 8; i++)
                     {
                         printf("%d ", 8 - i);
@@ -570,8 +590,8 @@ int main()
                         printf("\n");
                     }
                     printf("  a b c d e f g h\n");
-                    printf("%s\n", red(str));
-                    printf("%s:%s$ ", green("a7md@chess"), blue("~"));
+                    printf("%s\n", red(0, str));
+                    printf("%s:%s$ ", green(0, "a7md@chess"), blue(0, "~"));
 
                     char cmd[1000];
                     snprintf(cmd, sizeof(cmd), "python3 ai.py \"%s\"", req);
@@ -590,7 +610,7 @@ int main()
                         strcpy(str, "Error launching AI");
                         break;
                     }
-                    clear_screen();
+                    clear();
                 }
                 if (type(board, row, col) == 2)
                 {
@@ -638,13 +658,13 @@ int main()
             bool kc = false;
             bool qc = false;
 
-            if (strcmp(from, "e8") == 0 && strcmp(to, "c8") == 0 && strcmp(tmp[rf][cf], "♚") == 0) {
+            if (cmp(from, "e8") && cmp(to, "c8") && cmp(tmp[rf][cf], "♚")) {
                 tmp[0][2] = "♚";
                 tmp[0][3] = "♜";
                 tmp[0][0] = "·";
                 tmp[0][4] = "·";
                 qc = true;
-            } else if (strcmp(from, "e8") == 0 && strcmp(to, "g8") == 0 && strcmp(tmp[rf][cf], "♚") == 0) {
+            } else if (cmp(from, "e8") && cmp(to, "g8") && cmp(tmp[rf][cf], "♚")) {
                 tmp[0][6] = "♚";
                 tmp[0][5] = "♜";
                 tmp[0][7] = "·";
@@ -655,14 +675,14 @@ int main()
             // En Passant
             if (
             (cf-1 >= 0
-            && strcmp(tmp[rf][cf-1], "♙") == 0
-            && strcmp(tmp[rf][cf], "♟") == 0
+            && cmp(tmp[rf][cf-1], "♙")
+            && cmp(tmp[rf][cf], "♟")
             && rt == rf+1 && ct == cf-1
             )
             ||
             (cf+1 < 8
-            && strcmp(tmp[rf][cf+1], "♙") == 0
-            && strcmp(tmp[rf][cf], "♟") == 0
+            && cmp(tmp[rf][cf+1], "♙")
+            && cmp(tmp[rf][cf], "♟")
             && rt == rf+1 && ct == cf+1
             )
             ) {
@@ -670,16 +690,16 @@ int main()
             }
 
             // Promotion
-            if (strcmp(t, "r") == 0) {
+            if (cmp(t, "r")) {
                 tmp[rt][ct] = "♜";
             }
-            else if (strcmp(t, "n") == 0) {
+            else if (cmp(t, "n")) {
                 tmp[rt][ct] = "♞";
             }
-            else if (strcmp(t, "b") == 0) {
+            else if (cmp(t, "b")) {
                 tmp[rt][ct] = "♝";
             }
-            else if (strcmp(t, "q") == 0) {
+            else if (cmp(t, "q")) {
                 tmp[rt][ct] = "♛";
             }
             if (!kc && !qc)
@@ -692,13 +712,12 @@ int main()
             myturn = !myturn;
         }
 
-        if (strcmp(input, "x") == 0)
+        if (cmp(input, "x"))
         {
             break;
         }
     }
 
-    x_raw_mode();
 
     return 0;
 }

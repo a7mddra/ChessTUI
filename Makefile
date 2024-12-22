@@ -2,8 +2,8 @@
 CC = gcc
 CFLAGS = -Wall -g
 
-SRCS = main.c terminal/termios.c terminal/colors.c
-OBJS = main.o terminal/termios.o terminal/colors.o
+SRCS = main.c lib/colors.c
+OBJS = main.o lib/colors.o
 
 TARGET = chess_game
 
