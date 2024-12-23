@@ -38,7 +38,7 @@ To compile this project, ensure the following are installed on your Linux system
    pip install chess
    ```
 
-2. **Stockfish Engine**  
+2. **StockFish Engine**  
    Download the Stockfish binary from [Stockfish's official site](https://stockfishchess.org/download/).  
    Once downloaded, place it in the same directory where you cloned the repository. If you'd prefer to keep it elsewhere, make sure to update the path to the Stockfish binary in the `ai.py` file.
 
