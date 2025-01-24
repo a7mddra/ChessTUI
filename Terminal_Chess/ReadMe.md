@@ -1,4 +1,4 @@
-## Terminal Chess GUI for Stockfish
+## Terminal Chess GUI
 
 **A Linux terminal-based GUI for playing chess against Stockfish AI.**
 
