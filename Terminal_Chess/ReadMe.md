@@ -56,7 +56,7 @@ To compile this project, ensure the following are installed on your Linux system
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/a7mddra/ChessGUI.git
-   cd ChessGUI
+   cd ChessGUI/Terminal_Chess
    ```
 
 2. **Run Makefile**
