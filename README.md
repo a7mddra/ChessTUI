@@ -1,6 +1,4 @@
----
-
-### Chess GUIs  
+##### Chess GUIs  
 This is a chess package that provides many ways to play chess against the Stockfish Engine.  
 
 ---
