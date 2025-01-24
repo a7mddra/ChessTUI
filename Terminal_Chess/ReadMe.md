@@ -6,7 +6,6 @@ This project provides a lightweight graphical interface for Stockfish, allowing 
 It features real-time board updates, color-coded text, and seamless interaction between C and Python for enhanced gameplay.
 
 
-![App Screenshot](lib/test.png)
 
 ## **Key Features**
 
