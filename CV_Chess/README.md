@@ -63,7 +63,7 @@ To compile this project, ensure the following are installed on your system:
 
 ## **Demo**
 
-You can check out a demo of the chess game in action by visiting this [LinkedIn post](https://www.linkedin.com/posts/a7mddra_i-made-chess-in-terminal-using-c-hundreds-activity-7270785844255342592-MBoo?utm_source=share&utm_medium=member_desktop).
+You can check out a demo of the chess game in action by visiting this [LinkedIn post](https://www.linkedin.com/feed/update/urn:li:activity:7289358361463017472?utm_source=share&utm_medium=member_desktop).
 
 In the post, I showcase how the chess game runs, highlighting the AI's moves and the player's interaction with the game.
 
