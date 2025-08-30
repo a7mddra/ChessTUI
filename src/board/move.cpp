@@ -59,8 +59,9 @@ void Board::processMove(const std::string &input)
 {
     if (input.length() == consts::PR_LEN and promoting)
     {
+        auto self = shared_from_this();
         gBoard[to.first][to.second].set(
-            isWhite, {consts::PR_ROW, to.second}, promos[input[0]]);
+            self, isWhite, {consts::PR_ROW, to.second}, promos[input[0]]);
         promoting = false;
         reState();
         return;
@@ -140,20 +141,36 @@ bool Board::tryMove(const std::string &input)
         size_t x = consts::RANK_MAX - input[i + 1];
         size_t y = input[i] - consts::FILE_MIN;
 
-        if (i < consts::PN_LEN and state != gst::PENDING)
+        if (i < consts::PN_LEN and !pending)
         {
-            from = {x, y};
-            markValid(from);
-            setState(gst::PENDING);
+            if (state != gst::PENDING and gBoard[x][y].isme)
+            {
+                from = {x, y};
+                markValid(from);
+                setState(gst::PENDING);
+            }
+            else
+            {
+                if (eval[x][y] == 0)
+                {
+                    setState(gst::ERRMOVE);
+                    return false;
+                }
+                to = {x, y};
+                umarkValid();
+                reState();
+            }
         }
         else
         {
-            to = {x, y};
             if (eval[x][y] == 0)
             {
                 setState(gst::ERRMOVE);
+                return false;
             }
+            to = {x, y};
             umarkValid();
+            reState();
         }
     }
     return true;

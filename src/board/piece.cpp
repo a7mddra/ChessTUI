@@ -14,73 +14,23 @@ static std::string symbol_for(Identity id, bool white)
     }
 }
 
-/* ---------------- Implementation: Piece methods -------------------------- */
+/* ------------ Implementation: Piece methods ------------------ */
 
-void Piece::set(bool white, std::pair<int,int> p, const Piece &tpl)
+void Piece::set(
+    std::shared_ptr<Board> board,
+    bool white, std::pair<int,int> p, const Piece &tpl)
 {
-    identity   = tpl.identity;
-    isWhite    = white;
-    pos        = p;
-    moved      = tpl.moved;
-    OO         = tpl.OO;
-    OOO        = tpl.OOO;
-    enPassant  = tpl.enPassant;
-    isSliding  = tpl.isSliding;
-    deltas     = tpl.deltas;
-    eval       = 0;
-
-    baseSym = symbol_for(identity, isWhite);
-    sym     = baseSym;
-}
-
-void Piece::set(bool white, std::pair<int,int> p, Identity id)
-{
-    identity = id;
-    isWhite  = white;
-    pos      = p;
-    moved    = false;
-    OO = OOO = false;
+    isme      = tpl.identity != SQUARE and board->isWhite == white;
+    baseSym   = symbol_for(tpl.identity, isWhite);
+    identity  = tpl.identity;
+    sym       = baseSym;
     enPassant = {-1,-1};
-    eval = 0;
-
-    deltas.clear();
+    moved     = false;
+    OO = OOO  = false;
     isSliding = false;
-
-    switch (identity)
-    {
-        case PAWN:
-            isSliding = false;
-            deltas = { { -1, -1 }, { -1, 1 } };
-            break;
-        case ROOK:
-            isSliding = true;
-            deltas = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-            break;
-        case BISHOP:
-            isSliding = true;
-            deltas = { {1,1}, {1,-1}, {-1,1}, {-1,-1} };
-            break;
-        case KNIGHT:
-            isSliding = false;
-            deltas = { {1,2}, {2,1}, {-1,2}, {-2,1}, {1,-2}, {2,-1}, {-1,-2}, {-2,-1} };
-            break;
-        case QUEEN:
-            isSliding = true;
-            deltas = { {1,0}, {-1,0}, {0,1}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1} };
-            break;
-        case KING:
-            isSliding = false;
-            deltas = { {1,0}, {-1,0}, {0,1}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1} };
-            OO = OOO = false;
-            break;
-        case SQUARE:
-        default:
-            isSliding = false;
-            break;
-    }
-
-    baseSym = symbol_for(identity, isWhite);
-    sym     = baseSym;
+    isWhite   = white;
+    pos       = p;
+    eval      = 0;
 }
 
 void Piece::setPos(int r, int c)
@@ -106,7 +56,7 @@ void Piece::setEval(int v)
     }
 }
 
-/* ---------------- Canonical piece templates (color-agnostic) -------------- */
+/* -- Canonical piece templates (color-agnostic) -- */
 
 static Piece makePawnTpl()
 {
@@ -115,7 +65,7 @@ static Piece makePawnTpl()
     p.moved = false;
     p.enPassant = {-1,-1};
     p.isSliding = false;
-    p.deltas = { { -1, -1 }, { -1, 1 } }; 
+    p.deltas = {{ -1, -1 }, { -1, 1 }}; 
     p.baseSym = assets::pieces.at('p');
     p.sym = p.baseSym;
     return p;
@@ -127,7 +77,7 @@ static Piece makeRookTpl()
     p.identity = ROOK;
     p.moved = false;
     p.isSliding = true;
-    p.deltas = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+    p.deltas = {{ 1,  0}, {-1,  0}, { 0,  1}, { 0, -1}};
     p.baseSym = assets::pieces.at('r');
     p.sym = p.baseSym;
     return p;
@@ -139,7 +89,7 @@ static Piece makeBishopTpl()
     p.identity = BISHOP;
     p.moved = false;
     p.isSliding = true;
-    p.deltas = { {1,1}, {1,-1}, {-1,1}, {-1,-1} };
+    p.deltas = {{ 1,  1}, { 1, -1}, {-1,  1}, {-1, -1}};
     p.baseSym = assets::pieces.at('b');
     p.sym = p.baseSym;
     return p;
@@ -151,7 +101,8 @@ static Piece makeKnightTpl()
     p.identity = KNIGHT;
     p.moved = false;
     p.isSliding = false;
-    p.deltas = { {1,2}, {2,1}, {-1,2}, {-2,1}, {1,-2}, {2,-1}, {-1,-2}, {-2,-1} };
+    p.deltas = {{ 1,  2}, { 2,  1}, {-1,  2}, {-2,  1},
+                { 1, -2}, { 2, -1}, {-1, -2}, {-2, -1}};
     p.baseSym = assets::pieces.at('n');
     p.sym = p.baseSym;
     return p;
@@ -163,7 +114,8 @@ static Piece makeQueenTpl()
     p.identity = QUEEN;
     p.moved = false;
     p.isSliding = true;
-    p.deltas = { {1,0}, {-1,0}, {0,1}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1} };
+    p.deltas = {{ 1,  0}, {-1,  0}, { 0,  1}, { 0, -1},
+                { 1,  1}, { 1, -1}, {-1,  1}, {-1, -1}};
     p.baseSym = assets::pieces.at('q');
     p.sym = p.baseSym;
     return p;
@@ -176,7 +128,8 @@ static Piece makeKingTpl()
     p.moved = false;
     p.OO = p.OOO = false;
     p.isSliding = false;
-    p.deltas = { {1,0}, {-1,0}, {0,1}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1} };
+    p.deltas = {{ 1,  0}, {-1,  0}, { 0,  1}, { 0, -1},
+                { 1,  1}, { 1, -1}, {-1,  1}, {-1, -1}};
     p.baseSym = assets::pieces.at('k');
     p.sym = p.baseSym;
     return p;

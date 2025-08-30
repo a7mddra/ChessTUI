@@ -17,6 +17,7 @@ void Board::refBoard()
 
 void Board::markValid(std::pair<size_t, size_t> from)
 {
+    pending = true;
     // marking logic will update the eval values 1 -> valid move, -1 -> can attack, 0 -> other
     // mark valid moves that are in bounds of a piece limits && wont lead to a self-check
     eval[4][0] = 1;
@@ -25,6 +26,7 @@ void Board::markValid(std::pair<size_t, size_t> from)
 
 void Board::umarkValid()
 {
+    pending = false;
     eval = std::vector<std::vector<int>>(consts::ROWS, std::vector<int>(consts::COLS, 0));
     refBoard();
 }

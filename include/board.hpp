@@ -26,10 +26,10 @@ public:
     void printSplash();
     void printContent();
     void setState(gst st);
-    bool isWhite, promoting;
     std::atomic<bool> processing;
     std::vector<std::string> log;
     void init(bool isWhite = true);
+    bool isWhite, promoting, pending;
     std::pair<size_t, size_t> from, to;
     std::vector<std::vector<int>> eval;
     std::unordered_map<char, Piece> promos;

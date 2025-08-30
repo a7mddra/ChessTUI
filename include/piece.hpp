@@ -19,8 +19,10 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <utility>
 
+#include "board.hpp"
 #include "assets.hpp"
 #include "colors.hpp"
 
@@ -49,19 +51,20 @@ struct Piece
     /* Core identity + display */
     Identity identity = SQUARE;
     bool isWhite = false;
-    std::pair<int,int> pos = {-1, -1};   ///< row, col (0..7), -1 sentinel allowed
-    std::string baseSym;                 ///< original glyph (uncolored)
-    std::string sym;                     ///< glyph ready for printing (may be colored)
+    std::pair<int,int> pos = {-1, -1};       ///< row, col (0..7), -1 sentinel allowed
+    std::string baseSym;                     ///< original glyph (uncolored)
+    std::string sym;                         ///< glyph ready for printing (may be colored)
 
     /* Stateful chess flags */
+    int eval = 0;                            ///< 1 = valid move highlight, -1 = attackable, 0 = none
+    bool isme = false;                       ///< valid piece picking 
+    bool moved = false;                      ///< has this piece moved (useful for castling/pawn two-step)
+    bool OO = false, OOO = false;            ///< king castling rights (temporary flags)
     std::pair<int,int> enPassant = {-1, -1}; ///< valid en-passant capture target for pawn
-    bool moved = false;                       ///< has this piece moved (useful for castling/pawn two-step)
-    bool OO = false, OOO = false;             ///< king castling rights (temporary flags)
-    int eval = 0;                             ///< 1 = valid move highlight, -1 = attackable, 0 = none
 
-    /* Movement metadata (used by markValid/gen) */
-    bool isSliding = false;                   ///< true for Rook/Bishop/Queen
-    std::vector<std::pair<int,int>> deltas;   ///< direction offsets (row,col) or knight jumps
+    /* Movement metadata */
+    bool isSliding = false;                  ///< true for Rook/Bishop/Queen
+    std::vector<std::pair<int,int>> deltas;  ///< direction offsets (row,col) or knight jumps
 
     /* --------------------- methods --------------------- */
 
@@ -73,15 +76,7 @@ struct Piece
      * Copies movement metadata and flags from `tpl`, then applies `white` color
      * and sets the position `p`. `baseSym` / `sym` pick the correct glyph for color.
      */
-    void set(bool white, std::pair<int,int> p, const Piece &tpl);
-
-    /**
-     * @brief Initialize using an identity (convenience).
-     *
-     * Provides sane default movement metadata for the given identity.
-     * Equivalent to selecting a template for the chosen `Identity`.
-     */
-    void set(bool white, std::pair<int,int> p, Identity id);
+    void set(std::shared_ptr<Board> board, bool white, std::pair<int,int> p, const Piece &tpl);
 
     /** Update stored board coordinates. */
     void setPos(int r, int c);
