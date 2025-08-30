@@ -1,4 +1,5 @@
 #include "piece.hpp"
+#include "board.hpp" 
 
 static std::string symbol_for(Identity id, bool white)
 {
@@ -21,13 +22,14 @@ void Piece::set(
     bool white, std::pair<int,int> p, const Piece &tpl)
 {
     isme      = tpl.identity != SQUARE and board->isWhite == white;
-    baseSym   = symbol_for(tpl.identity, isWhite);
+    baseSym   = symbol_for(tpl.identity, white);
+    isSliding = tpl.isSliding;
     identity  = tpl.identity;
+    deltas    = tpl.deltas;
     sym       = baseSym;
     enPassant = {-1,-1};
     moved     = false;
     OO = OOO  = false;
-    isSliding = false;
     isWhite   = white;
     pos       = p;
     eval      = 0;

@@ -1,7 +1,6 @@
 #include "console.hpp"
 #include "assets.hpp"
 #include "colors.hpp"
-#include "board.hpp"
 
 namespace console {
     void hideCursor() { std::cout << "\x1b[?25l" << std::flush; }

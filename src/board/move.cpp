@@ -145,9 +145,9 @@ bool Board::tryMove(const std::string &input)
         {
             if (state != gst::PENDING and gBoard[x][y].isme)
             {
+                setState(gst::PENDING);
                 from = {x, y};
                 markValid(from);
-                setState(gst::PENDING);
             }
             else
             {
@@ -157,7 +157,6 @@ bool Board::tryMove(const std::string &input)
                     return false;
                 }
                 to = {x, y};
-                umarkValid();
                 reState();
             }
         }
@@ -169,7 +168,6 @@ bool Board::tryMove(const std::string &input)
                 return false;
             }
             to = {x, y};
-            umarkValid();
             reState();
         }
     }

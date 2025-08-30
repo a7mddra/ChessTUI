@@ -22,9 +22,10 @@
 #include <memory>
 #include <utility>
 
-#include "board.hpp"
 #include "assets.hpp"
 #include "colors.hpp"
+
+class Board;
 
 enum Identity
 {

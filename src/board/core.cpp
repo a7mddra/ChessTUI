@@ -4,16 +4,13 @@
 #include "assets.hpp"
 
 Board::Board()
-    : isWhite(true), promoting(false)
-{
-    init(isWhite);
-}
+    : isWhite(true), promoting(false), processing(false) {}
 
 void Board::init(bool white)
 {
     isWhite = white;
     promos = {{'q', Queen}, {'r', Rook}, {'b', Bishop}, {'n', Knight}};
-    
+
     auto self = shared_from_this();
 
     N1.set(self, isWhite, {7, 1}, Knight);
@@ -63,7 +60,6 @@ void Board::init(bool white)
         {R1, N1, B1, QQ, KK, B2, N2, R2}};
 
     reState();
-    umarkValid();
     pending = false;
     promoting = false;
     processing.store(false);
@@ -72,6 +68,7 @@ void Board::init(bool white)
 void Board::setState(gst st)
 {
     state = st;
+    umarkValid();
     log = assets::logs[st];
 }
 
