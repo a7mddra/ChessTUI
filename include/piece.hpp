@@ -52,7 +52,6 @@ struct Piece
     /* Core identity + display */
     Identity identity = SQUARE;
     bool isWhite = false;
-    std::pair<int,int> pos = {-1, -1};       ///< row, col (0..7), -1 sentinel allowed
     std::string baseSym;                     ///< original glyph (uncolored)
     std::string sym;                         ///< glyph ready for printing (may be colored)
 
@@ -77,10 +76,7 @@ struct Piece
      * Copies movement metadata and flags from `tpl`, then applies `white` color
      * and sets the position `p`. `baseSym` / `sym` pick the correct glyph for color.
      */
-    void set(std::shared_ptr<Board> board, bool white, std::pair<int,int> p, const Piece &tpl);
-
-    /** Update stored board coordinates. */
-    void setPos(int r, int c);
+    void set(std::shared_ptr<Board> board, bool white, const Piece &tpl);
 
     /**
      * @brief Set evaluation marker for display.

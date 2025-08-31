@@ -19,19 +19,20 @@ public:
     Board();
     gst state;
     void run();
+    void init();
     void spinner();
     void reState();
-    void refBoard();
+    void syncEval();
     void printLog();
     void printSplash();
     void printContent();
     void setState(gst st);
+    bool isWhite, promoting;
     std::atomic<bool> processing;
     std::vector<std::string> log;
-    void init(bool isWhite = true);
-    bool isWhite, promoting, pending;
     std::pair<size_t, size_t> from, to;
     std::vector<std::vector<int>> eval;
+    const Piece &cell(int r, int c) const;
     std::unordered_map<char, Piece> promos;
     std::vector<std::vector<Piece>> gBoard;
     Piece
@@ -40,8 +41,6 @@ public:
         r1, r2, R1, R2,
         n1, n2, N1, N2,
         b1, b2, B1, B2,
-        q, r, b, n,
-        Q, R, B, N,
         qq, QQ,
         kk, KK,
         sq;

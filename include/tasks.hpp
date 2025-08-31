@@ -35,9 +35,7 @@ namespace tasks
                 std::this_thread::sleep_for(std::chrono::milliseconds(2000));
                 board->gBoard[3][4] = board->gBoard[1][4];
                 board->gBoard[1][4] = board->sq;
-                board->eval[0][0] = -1;
                 board->reState();
-                board->refBoard();
             }
             catch (const std::exception)
             {

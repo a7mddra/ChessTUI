@@ -19,7 +19,7 @@ static std::string symbol_for(Identity id, bool white)
 
 void Piece::set(
     std::shared_ptr<Board> board,
-    bool white, std::pair<int,int> p, const Piece &tpl)
+    bool white, const Piece &tpl)
 {
     isme      = tpl.identity != SQUARE and board->isWhite == white;
     baseSym   = symbol_for(tpl.identity, white);
@@ -31,14 +31,7 @@ void Piece::set(
     moved     = false;
     OO = OOO  = false;
     isWhite   = white;
-    pos       = p;
     eval      = 0;
-}
-
-void Piece::setPos(int r, int c)
-{
-    pos.first  = r;
-    pos.second = c;
 }
 
 void Piece::setEval(int v)
@@ -50,7 +43,8 @@ void Piece::setEval(int v)
     }
     else if (eval == -1)
     {
-        sym = color::red(baseSym);
+        sym = color::red(
+            symbol_for(identity, true));
     }
     else
     {

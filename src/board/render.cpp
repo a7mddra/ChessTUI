@@ -7,7 +7,7 @@
 void Board::spinner()
 {
     size_t idx = 0;
-    console::saveCursor();  
+    console::saveCursor();
     console::hideCursor();
     while (processing.load())
     {
@@ -24,7 +24,7 @@ void Board::spinner()
         idx = (idx + 1) % assets::frames.size();
     }
 
-    {  
+    {
         console::showCursor();
     }
 }
@@ -32,30 +32,40 @@ void Board::spinner()
 void Board::printBoard()
 {
     std::vector<std::string> pBoard;
-    pBoard.reserve(consts::ROWS +1);
+    pBoard.reserve(consts::ROWS + 1);
 
     for (int r = 0; r < consts::ROWS; ++r)
     {
-        std::string row = std::to_string(consts::ROWS - r) + " ";
+        std::vector<std::string> tokens;
+        tokens.reserve(consts::COLS);
         for (int c = 0; c < consts::COLS; ++c)
-        {
-            row += gBoard[r][c].sym;
-            row += ' ';
-        }
-        pBoard.emplace_back(row);
+            tokens.push_back(gBoard[r][c].sym + " ");
+
+        if (!isWhite)
+            std::reverse(tokens.begin(), tokens.end());
+
+        std::string row = std::to_string(consts::ROWS - r) + " ";
+        for (auto &t : tokens) row += t;
+        pBoard.emplace_back(std::move(row));
     }
 
     std::string footer = "  ";
     for (int c = 0; c < consts::COLS; ++c)
     {
-        footer += char('A' + c);
+        char file = isWhite ? (consts::FILE_MIN + c)
+                            : (consts::FILE_MAX - c);
+        footer += static_cast<char>(std::toupper(static_cast<unsigned char>(file)));
         footer += ' ';
     }
-    pBoard.emplace_back(footer);
 
+    if (!isWhite)
+        std::reverse(pBoard.begin(), pBoard.end());
+
+    pBoard.emplace_back(std::move(footer));
     print(pBoard, 'w', true);
     print({"\n"}, 'w', true);
 }
+
 
 void Board::printHeader()
 {

@@ -32,8 +32,8 @@ namespace consts
     constexpr int SPL = 3000;
 
     /* ---- Input lens ----*/
-    constexpr int FL_LEN = 4;
-    constexpr int PN_LEN = 2;
-    constexpr int PR_LEN = 1;
+    constexpr size_t FL_LEN = 4;
+    constexpr size_t PN_LEN = 2;
+    constexpr size_t PR_LEN = 1;
 
 }

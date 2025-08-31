@@ -3,7 +3,7 @@
 int main()
 {
     auto board = std::make_shared<Board>();
-    board->init(true);
+    board->init();
     board->run();
     return 0;
 }
