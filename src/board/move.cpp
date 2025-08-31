@@ -7,8 +7,14 @@
 
 void Board::readLine()
 {
-    std::string line = std::string(padd("$ e2e4"), ' ');
-    line += color::orange("$ ");
+    std::string prompt = assets::cursor;
+    prompt += std::string(
+         + promoting
+        ? consts::PR_LEN
+        : consts::FL_LEN, ' ');
+    std::string line = std::string(
+        padd(prompt), ' ');
+    line += color::orange(assets::cursor);
     std::cout << line;
     std::string input;
     std::getline(std::cin, input);
@@ -33,6 +39,13 @@ void Board::processInput(const std::string &input)
     if (input == "new")
     {
         init();
+        return;
+    }
+
+    /*debug*/
+    if (input == "fen")
+    {
+        log.assign({genFEN()});
         return;
     }
 
@@ -73,20 +86,10 @@ void Board::processMove(const std::string &input)
     Piece tmp = gBoard[from.first][from.second];
     gBoard[from.first][from.second] = sq;
 
-    if (tmp.identity == PAWN)
+    if (tmp.identity == PAWN and to.first == consts::PR_ROW)
     {
-        auto &[enF, enS] = tmp.enPassant;
-
-        if (enF > -1)
-        {
-            gBoard[enF][enS] = sq;
-        }        
-        else if (to.first == consts::PR_ROW)
-        {
-            setState(gst::PROMOTION);
-            promoting = true;
-        }
-
+        setState(gst::PROMOTION);
+        promoting = true;
     }
     else if (tmp.identity == KING)
     {
@@ -147,8 +150,31 @@ bool Board::tryMove(const std::string &input)
             setState(gst::ERRMOVE);
             return false;
         }
-        to = { x, y };
+        to = {x, y};
+        hfmvCLK++;
         reState();
+        int tmp = cntEMT();
+        auto [r, c] = from;
+        auto id = gBoard[r][c].identity;
+        bool enP = (id == PAWN && abs(x - r) == 2);
+        if (enP)
+        {
+            enpME = input.length() > consts::PN_LEN
+                ? input.substr(2, consts::PN_LEN)
+                : input;
+            enpME[1] = isWhite
+                ? static_cast<char>(static_cast<unsigned char>(enpME[1]) - 1)
+                : static_cast<char>(static_cast<unsigned char>(enpME[1]) + 1);
+        }
+        else
+        {
+            enpME = "-";
+        }
+        if (totEMT < tmp or id == PAWN)
+        {
+            hfmvCLK = 0;
+        }
+        totEMT = cntEMT();
         return true;
     };
 

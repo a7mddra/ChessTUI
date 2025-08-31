@@ -60,7 +60,6 @@ struct Piece
     bool isme = false;                       ///< valid piece picking 
     bool moved = false;                      ///< has this piece moved (useful for castling/pawn two-step)
     bool OO = false, OOO = false;            ///< king castling rights (temporary flags)
-    std::pair<int,int> enPassant = {-1, -1}; ///< valid en-passant capture target for pawn
 
     /* Movement metadata */
     bool isSliding = false;                  ///< true for Rook/Bishop/Queen

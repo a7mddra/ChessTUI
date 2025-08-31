@@ -25,34 +25,32 @@ const Piece& Board::cell(int r, int c) const {
 
 void Board::markValid(std::pair<size_t, size_t> from)
 {
-    // use signed ints for arithmetic to avoid unsigned underflow
     int r = static_cast<int>(from.first);
     int c = static_cast<int>(from.second);
 
-    const Piece &p = gBoard[from.first][from.second]; // read-only reference
+    const Piece &p = gBoard[from.first][from.second];
 
     switch (p.identity)
     {
     case PAWN:
     {
-        // direction: white pawns move -1 (up), black pawns +1 (down)
         int dir = p.isWhite ? -1 : 1;
 
-        int one = r + dir;
-        if (one >= 0 && one < consts::ROWS)
+        int st1 = r + dir;
+        if (st1 >= 0 && st1 < consts::ROWS)
         {
-            if (gBoard[one][c].identity == SQUARE)
-                eval[one][c] = 1;
+            if (gBoard[st1][c].identity == SQUARE)
+                eval[st1][c] = 1;
 
-            int two = r + 2*dir;
-            if (!p.moved && two >= 0 && two < consts::ROWS && gBoard[two][c].identity == SQUARE
-                && gBoard[one][c].identity == SQUARE)
+            int st2 = r + 2*dir;
+            if (!p.moved && st2 >= 0 && st2 < consts::ROWS
+                && gBoard[st2][c].identity == SQUARE
+                && gBoard[st1][c].identity == SQUARE)
             {
-                eval[two][c] = 1;
+                eval[st2][c] = 1;
             }
         }
 
-        // captures: use the piece's deltas (which should be oriented for piece color)
         for (auto [dr, dc] : p.deltas)
         {
             int nr = r + dr;
@@ -64,7 +62,12 @@ void Board::markValid(std::pair<size_t, size_t> from)
                 {
                     eval[nr][nc] = -1;
                 }
-                // TODO: en passant capture detection can also mark an attack square here
+                const Piece &aiP = gBoard[ai.first][ai.second];
+                if (enpAI and ai.first == r and ai.second == nc)
+                {
+                    eval[nr][nc] = 1;
+                    eval[r][nc] = -1;
+                }
             }
         }
         break;

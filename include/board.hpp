@@ -20,6 +20,7 @@ public:
     gst state;
     void run();
     void init();
+    int cntEMT();
     void spinner();
     void reState();
     void syncEval();
@@ -27,14 +28,16 @@ public:
     void printSplash();
     void printContent();
     void setState(gst st);
-    bool isWhite, promoting;
+    int hfmvCLK, flmvCNT, totEMT;
     std::atomic<bool> processing;
     std::vector<std::string> log;
-    std::pair<size_t, size_t> from, to;
+    std::string genFEN(), enpME;
+    bool isWhite, promoting, enpAI;
     std::vector<std::vector<int>> eval;
     const Piece &cell(int r, int c) const;
     std::unordered_map<char, Piece> promos;
     std::vector<std::vector<Piece>> gBoard;
+    std::pair<size_t, size_t> from, to, ai;
     Piece
         p1, p2, p3, p4, p5, p6, p7, p8,
         P1, P2, P3, P4, P5, P6, P7, P8,

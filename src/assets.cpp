@@ -2,6 +2,8 @@
 
 namespace assets
 {
+    std::string cursor = "$ ";
+
     std::unordered_map<gst, std::vector<std::string>> logs = {
         {gst::CHECK,     {"Check!"},},
         {gst::LOADING,   {"Loading"},},
@@ -56,9 +58,8 @@ namespace assets
         " \\____|_| |_|_____|____/____/ "};
 
     std::unordered_map<char, std::string> pieces = {
-        {'p', "♟"}, {'r', "♜"}, {'b', "♝"}, {'n', "♞"},
-        {'P', "♙"}, {'R', "♖"}, {'B', "♗"}, {'N', "♘"},
-        {'k', "♚"}, {'q', "♛"}, {'K', "♔"}, {'Q', "♕"},
+        {'P', "♟"}, {'R', "♜"}, {'B', "♝"}, {'N', "♞"},
+        {'p', "♙"}, {'r', "♖"}, {'b', "♗"}, {'n', "♘"},
+        {'K', "♚"}, {'Q', "♛"}, {'k', "♔"}, {'q', "♕"},
         {'s', "·"}, {'h', color::blue("•")}};
-    
 }

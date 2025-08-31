@@ -20,7 +20,7 @@ void Board::init()
     B2.set(self, 1, Bishop);
     N2.set(self, 1, Knight);
     R2.set(self, 1, Rook);
-    
+
     P1.set(self, 1, Pawn);
     P2.set(self, 1, Pawn);
     P3.set(self, 1, Pawn);
@@ -61,8 +61,81 @@ void Board::init()
         {R1, N1, B1, QQ, KK, B2, N2, R2}};
 
     reState();
-    promoting = false;
-    processing.store(false);
+    enpME = "-";
+    hfmvCLK = 0;
+    flmvCNT = 1;
+    totEMT = cntEMT();
+}
+
+std::string Board::genFEN()
+{
+    std::unordered_map<std::string, char> glyph2ch;
+    glyph2ch.reserve(assets::pieces.size());
+    for (auto const &[k, v] : assets::pieces)
+        glyph2ch.emplace(v, k);
+
+    std::string fen;
+    for (size_t r = 0; r < consts::ROWS; ++r)
+    {
+        int emt = 0;
+        for (auto &pc : gBoard[r])
+        {
+            if (pc.identity == SQUARE)
+            {
+                ++emt;
+            }
+            else
+            {
+                if (emt > 0)
+                {
+                    fen += std::to_string(emt);
+                    emt = 0;
+                }
+
+                auto it = glyph2ch.find(pc.baseSym);
+                if (it != glyph2ch.end())
+                    fen += it->second;
+            }
+        }
+
+        if (emt > 0)
+            fen += std::to_string(emt);
+
+        if (r + 1 < consts::ROWS)
+            fen += '/';
+    }
+
+    fen += isWhite ? " w " : " b ";
+
+    if (!KK.moved)
+        fen += 'K';
+    if (!KK.moved)
+        fen += 'Q';
+
+    if (!kk.moved)
+        fen += 'k';
+    if (!kk.moved)
+        fen += 'q';
+
+    if (kk.moved && kk.moved && KK.moved && KK.moved)
+        fen += '-';
+
+    fen += ' ' + enpME + ' ';
+
+    fen += std::to_string(hfmvCLK) + ' ';
+    fen += std::to_string(flmvCNT);
+
+    return fen;
+}
+
+int Board::cntEMT()
+{
+    int cnt = 0;
+    for (auto &row : gBoard)
+        for (auto &p : row)
+            if (p.identity == SQUARE)
+                cnt++;
+    return cnt;
 }
 
 void Board::setState(gst st)

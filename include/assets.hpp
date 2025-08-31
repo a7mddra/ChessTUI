@@ -13,6 +13,7 @@ enum class gst
 
 namespace assets
 {
+    extern std::string cursor;
     extern std::vector<std::string> frames;
     extern std::vector<std::string> splash;
     extern std::vector<std::string> header;

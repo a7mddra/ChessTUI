@@ -9,7 +9,7 @@ namespace consts
 
     constexpr int PR_ROW = 0;
 
-    /* ----- Castling ------*/
+    /* ------ Special ------*/
     constexpr int CTL_ROW = 7;
     constexpr int KSC_COL = 6;
     constexpr int QSC_COL = 2;
@@ -35,5 +35,6 @@ namespace consts
     constexpr size_t FL_LEN = 4;
     constexpr size_t PN_LEN = 2;
     constexpr size_t PR_LEN = 1;
+    constexpr size_t CRSR_LEN = 2;
 
 }

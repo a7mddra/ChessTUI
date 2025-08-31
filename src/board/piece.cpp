@@ -5,12 +5,12 @@ static std::string symbol_for(Identity id, bool white)
 {
     switch (id)
     {
-        case PAWN:   return assets::pieces[ white ? 'p' : 'P' ];
-        case ROOK:   return assets::pieces[ white ? 'r' : 'R' ];
-        case BISHOP: return assets::pieces[ white ? 'b' : 'B' ];
-        case KNIGHT: return assets::pieces[ white ? 'n' : 'N' ];
-        case QUEEN:  return assets::pieces[ white ? 'q' : 'Q' ];
-        case KING:   return assets::pieces[ white ? 'k' : 'K' ];
+        case PAWN:   return assets::pieces[ white ? 'P' : 'p' ];
+        case ROOK:   return assets::pieces[ white ? 'R' : 'r' ];
+        case BISHOP: return assets::pieces[ white ? 'B' : 'b' ];
+        case KNIGHT: return assets::pieces[ white ? 'N' : 'n' ];
+        case QUEEN:  return assets::pieces[ white ? 'Q' : 'q' ];
+        case KING:   return assets::pieces[ white ? 'K' : 'k' ];
         default:     return assets::pieces['s'];
     }
 }
@@ -27,7 +27,6 @@ void Piece::set(
     identity  = tpl.identity;
     deltas    = tpl.deltas;
     sym       = baseSym;
-    enPassant = {-1,-1};
     moved     = false;
     OO = OOO  = false;
     isWhite   = white;
@@ -59,7 +58,6 @@ static Piece makePawnTpl()
     Piece p;
     p.identity = PAWN;
     p.moved = false;
-    p.enPassant = {-1,-1};
     p.isSliding = false;
     p.deltas = {{ -1, -1 }, { -1, 1 }}; 
     p.baseSym = assets::pieces.at('p');
