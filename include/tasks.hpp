@@ -1,6 +1,7 @@
 #pragma once
 #include "console.hpp"
 #include "constants.hpp"
+#include <fstream>
 
 namespace tasks
 {
@@ -23,6 +24,7 @@ namespace tasks
             std::this_thread::sleep_for(
                 std::chrono::milliseconds(consts::SPL));
             board->processing.store(false);
+            board->reState();
         };
     }
 
@@ -35,22 +37,44 @@ namespace tasks
         {
             try
             {
-                
                 std::string fen = board->genFEN();
                 std::string resp;
                 
-                // send fen then listen to resp
-                /*---------------- Simulate AI thinking time --------------*/
-                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                /*
+                 * Run wrapper.py with arg fen and lestin to resp.
+                 *
+                 *------------------ Simulate AI thinking ----------------*/
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                {
+                    std::ifstream fin("debug.txt");
+                    if (fin)
+                    {
+                        std::getline(fin, resp);
+                        auto ltrim = [](std::string &s){
+                            size_t p = 0;
+                            while (p < s.size() && std::isspace(
+                                static_cast<unsigned char>(s[p]))) ++p;
+                            if (p) s.erase(0, p);
+                        };
+                        auto rtrim = [](std::string &s){
+                            while (!s.empty() && std::isspace(
+                                static_cast<unsigned char>(s.back())))
+                                    s.pop_back();
+                        };
+                        ltrim(resp);
+                        rtrim(resp);
+                    }
+                }
+                /*-------------------------------------------------------*/
 
                 char file = resp[0];
                 char rank = resp[1];
-                size_t xf = static_cast<size_t>(consts::RANK_MAX - rank); 
-                size_t yf = static_cast<size_t>(file - consts::FILE_MIN); 
+                size_t xf = static_cast<size_t>(consts::RANK_MAX - rank);
+                size_t yf = static_cast<size_t>(file - consts::FILE_MIN);
                 file      = resp[2];
                 rank      = resp[3];
                 size_t xt = static_cast<size_t>(consts::RANK_MAX - rank);
-                size_t yt = static_cast<size_t>(file - consts::FILE_MIN); 
+                size_t yt = static_cast<size_t>(file - consts::FILE_MIN);
                 board->ai = {xt, yt};
                 char prom = resp.length() > 4 ? resp[4] : '-';
                 auto &pc  = board->gBoard[xf][yf];
@@ -59,15 +83,15 @@ namespace tasks
                 if (id == PAWN and yf != yt
                     && board->gBoard[xt][yt].identity == SQUARE)
                 {
-                    int dir = pc.isWhite ? 1 : -1;
-                    board->gBoard[xf + dir][yf] = board->sq;
+                    board->gBoard[xf][yt] = board->sq;
                 }
 
-                board->enpAI = (id == PAWN && abs(xf - xt) == 2);
+                board->enpAI = (id == PAWN
+                    && std::abs(static_cast<int>(xf) - static_cast<int>(xt)) == 2);
 
                 board->gBoard[xt][yt] = board->gBoard[xf][yf];
                 board->gBoard[xf][yf] = board->sq;
-
+                board->gBoard[xt][yt].moved = true;
 
                 if (board->totEMT < board->cntEMT() or id == PAWN)
                 {
@@ -78,7 +102,7 @@ namespace tasks
                 if (prom != '-')
                 {
                     board->gBoard[xt][yt].set(
-                        board, board->isWhite, board->promos[prom]);
+                        board, !board->isWhite, board->promos[prom]);
                 }
 
                 if (id == KING)
@@ -95,9 +119,9 @@ namespace tasks
                         board->gBoard[xt][consts::RKC_FR] = board->sq;
                         board->gBoard[xt][consts::RKC_TO].moved = true;
                     }
+
                 }
 
-                board->gBoard[xt][yt].moved = true;
                 board->flmvCNT++;
                 board->reState();
             }

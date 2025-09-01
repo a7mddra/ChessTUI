@@ -65,6 +65,13 @@ void Board::init()
     hfmvCLK = 0;
     flmvCNT = 1;
     totEMT = cntEMT();
+
+    if (!isWhite)
+    {
+        parallel::runParallel(
+            tasks::makeSpinner(self),
+            tasks::makeAI(self));
+    }
 }
 
 std::string Board::genFEN()
@@ -107,7 +114,7 @@ std::string Board::genFEN()
 
     fen += isWhite ? " w " : " b ";
 
-    std::string cast = "-";
+    std::string cast;
     if (!KK.moved && !R2.moved)
         cast += 'K';
     if (!KK.moved && !R1.moved)
@@ -116,6 +123,8 @@ std::string Board::genFEN()
         cast += 'k';
     if (!kk.moved && !r1.moved)
         cast += 'q';
+    if (!cast.size())
+        cast = "-";
 
     fen += cast + ' ' + enpME + ' ';
 
@@ -148,17 +157,6 @@ void Board::render()
     parallel::runParallel(
         tasks::showSplash(self),
         tasks::makeSpinner(self));
-
-    if (isWhite)
-    {
-        setState(gst::INPUT);
-    }
-    else
-    {
-        parallel::runParallel(
-            tasks::makeAI(self),
-            tasks::makeSpinner(self));
-    }
 
     while (state != gst::EXITING)
     {

@@ -27,8 +27,10 @@ void Board::markValid(std::pair<size_t, size_t> from)
 {
     int r = static_cast<int>(from.first);
     int c = static_cast<int>(from.second);
+    auto &[ai_r, ai_c] = ai;
 
-    const Piece &p = gBoard[from.first][from.second];
+    const Piece &p   = gBoard[r][c];
+    const Piece &aiP = gBoard[ai_r][ai_c];
 
     switch (p.identity)
     {
@@ -62,8 +64,7 @@ void Board::markValid(std::pair<size_t, size_t> from)
                 {
                     eval[nr][nc] = -1;
                 }
-                const Piece &aiP = gBoard[ai.first][ai.second];
-                if (enpAI and ai.first == r and ai.second == nc)
+                if (enpAI and ai_r == r and ai_c == nc)
                 {
                     eval[nr][nc] = 1;
                     eval[r][nc] = -1;

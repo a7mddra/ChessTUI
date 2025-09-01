@@ -63,7 +63,6 @@ void Board::processInput(const std::string &input)
             parallel::runParallel(
                 tasks::makeSpinner(self),
                 tasks::makeAI(self));
-            reState();
         }
     }
 }
@@ -86,10 +85,18 @@ void Board::processMove(const std::string &input)
     Piece tmp = gBoard[from.first][from.second];
     gBoard[from.first][from.second] = sq;
 
-    if (tmp.identity == PAWN and to.first == consts::PR_ROW)
+    if (tmp.identity == PAWN)
     {
-        setState(gst::PROMOTION);
-        promoting = true;
+        if (to.first == consts::PR_ROW)
+        {
+            setState(gst::PROMOTION);
+            promoting = true;
+        }
+        if (from.second != to.second &&
+            gBoard[to.first][to.second].identity == SQUARE)
+        {
+            gBoard[from.first][to.second] = sq;
+        }
     }
     else if (tmp.identity == KING)
     {
@@ -145,19 +152,19 @@ bool Board::tryMove(const std::string &input)
 
     auto hanDest = [&](size_t x, size_t y) -> bool
     {
-        if (eval[x][y] == 0)
-        {
-            setState(gst::ERRMOVE);
-            return false;
-        }
+        // if (eval[x][y] == 0)
+        // {
+        //     setState(gst::ERRMOVE);
+        //     return false;
+        // }
         to = {x, y};
         hfmvCLK++;
         reState();
         int tmp = cntEMT();
         auto [r, c] = from;
         auto id = gBoard[r][c].identity;
-        bool enP = (id == PAWN && abs(x - r) == 2);
-        if (enP)
+        bool enp = (id == PAWN && abs(x - r) == 2);
+        if (enp)
         {
             enpME = input.length() > consts::PN_LEN
                 ? input.substr(2, consts::PN_LEN)
