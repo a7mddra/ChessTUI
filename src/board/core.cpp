@@ -107,20 +107,17 @@ std::string Board::genFEN()
 
     fen += isWhite ? " w " : " b ";
 
-    if (!KK.moved)
-        fen += 'K';
-    if (!KK.moved)
-        fen += 'Q';
+    std::string cast = "-";
+    if (!KK.moved && !R2.moved)
+        cast += 'K';
+    if (!KK.moved && !R1.moved)
+        cast += 'Q';
+    if (!kk.moved && !r2.moved)
+        cast += 'k';
+    if (!kk.moved && !r1.moved)
+        cast += 'q';
 
-    if (!kk.moved)
-        fen += 'k';
-    if (!kk.moved)
-        fen += 'q';
-
-    if (kk.moved && kk.moved && KK.moved && KK.moved)
-        fen += '-';
-
-    fen += ' ' + enpME + ' ';
+    fen += cast + ' ' + enpME + ' ';
 
     fen += std::to_string(hfmvCLK) + ' ';
     fen += std::to_string(flmvCNT);
