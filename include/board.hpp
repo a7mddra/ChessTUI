@@ -13,31 +13,51 @@
 
 #include "piece.hpp"
 
-class Board : public std::enable_shared_from_this<Board> 
+class Board
+    : public std::enable_shared_from_this<Board> 
 {
 public:
     Board();
-    gst state;
-    void run();
-    void init();
+
+    bool inBounds(int r, int c) const;
+    const Piece &cell(int r, int c) const;
     int cntEMT();
+
+    void init();
+    void run();
     void spinner();
-    void reState();
+    
     void syncEval();
-    void printLog();
-    void printSplash();
     void printContent();
+    void printSplash();
+    void printLog();
+    
+    gst state;
+    void reState();
     void setState(gst st);
-    int hfmvCLK, flmvCNT, totEMT;
+
+
+    std::string genFEN();
+    std::string enpME;
+
+    bool isWhite   = true;
+    bool promoting = false;
+    bool enpAI     = false;
+
+    int hfmvCLK = 0;
+    int flmvCNT = 1;
+    int totEMT  = 0;
+
     std::atomic<bool> processing;
     std::vector<std::string> log;
-    std::string genFEN(), enpME;
-    bool isWhite, promoting, enpAI;
+
     std::vector<std::vector<int>> eval;
-    const Piece &cell(int r, int c) const;
+
+    std::pair<size_t, size_t> from, to, ai;
+
     std::unordered_map<char, Piece> promos;
     std::vector<std::vector<Piece>> gBoard;
-    std::pair<size_t, size_t> from, to, ai;
+
     Piece
         p1, p2, p3, p4, p5, p6, p7, p8,
         P1, P2, P3, P4, P5, P6, P7, P8,
@@ -51,11 +71,12 @@ public:
 private:
     void render();
     void readLine();
-    void umarkValid();
-    void printBoard();
     void printHeader();
+    void printBoard();
+
+    void processInput(const std::string &input);
     bool tryMove(const std::string &input);
     void processMove(const std::string &input);
-    void processInput(const std::string &input);
     void markValid(std::pair<size_t, size_t> from);
+    void umarkValid();
 };

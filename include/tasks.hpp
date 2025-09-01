@@ -39,7 +39,7 @@ namespace tasks
             {
                 std::string fen = board->genFEN();
                 std::string resp;
-                
+
                 /*
                  * Run wrapper.py with arg fen and lestin to resp.
                  *
@@ -50,16 +50,20 @@ namespace tasks
                     if (fin)
                     {
                         std::getline(fin, resp);
-                        auto ltrim = [](std::string &s){
+                        auto ltrim = [](std::string &s)
+                        {
                             size_t p = 0;
                             while (p < s.size() && std::isspace(
-                                static_cast<unsigned char>(s[p]))) ++p;
-                            if (p) s.erase(0, p);
+                                    static_cast<unsigned char>(s[p])))
+                                ++p;
+                            if (p)
+                                s.erase(0, p);
                         };
-                        auto rtrim = [](std::string &s){
+                        auto rtrim = [](std::string &s)
+                        {
                             while (!s.empty() && std::isspace(
-                                static_cast<unsigned char>(s.back())))
-                                    s.pop_back();
+                                    static_cast<unsigned char>(s.back())))
+                                s.pop_back();
                         };
                         ltrim(resp);
                         rtrim(resp);
@@ -71,25 +75,26 @@ namespace tasks
                 char rank = resp[1];
                 size_t xf = static_cast<size_t>(consts::RANK_MAX - rank);
                 size_t yf = static_cast<size_t>(file - consts::FILE_MIN);
-                file      = resp[2];
-                rank      = resp[3];
+                file = resp[2];
+                rank = resp[3];
                 size_t xt = static_cast<size_t>(consts::RANK_MAX - rank);
                 size_t yt = static_cast<size_t>(file - consts::FILE_MIN);
                 board->ai = {xt, yt};
                 char prom = resp.length() > 4 ? resp[4] : '-';
-                auto &pc  = board->gBoard[xf][yf];
-                auto id   = pc.identity;
+                auto &pc = board->gBoard[xf][yf];
+                auto id = pc.identity;
 
-                if (id == PAWN and yf != yt
-                    && board->gBoard[xt][yt].identity == SQUARE)
+                if (id == PAWN and yf != yt &&
+                    board->gBoard[xt][yt].identity == SQUARE)
                 {
                     board->gBoard[xf][yt] = board->sq;
                 }
 
-                board->enpAI = (id == PAWN
-                    && std::abs(static_cast<int>(xf) - static_cast<int>(xt)) == 2);
+                board->enpAI = (id == PAWN && 
+                    std::abs(static_cast<int>(xf) - static_cast<int>(xt)) == 2);
 
-                board->gBoard[xt][yt] = board->gBoard[xf][yf];
+                board->gBoard[xt][yt] =
+                    board->gBoard[xf][yf];
                 board->gBoard[xf][yf] = board->sq;
                 board->gBoard[xt][yt].moved = true;
 
@@ -109,17 +114,18 @@ namespace tasks
                 {
                     if (yf - yt == 2)
                     {
-                        board->gBoard[xt][consts::RQC_TO] = board->gBoard[xt][consts::RQC_FR];
+                        board->gBoard[xt][consts::RQC_TO] =
+                            board->gBoard[xt][consts::RQC_FR];
                         board->gBoard[xt][consts::RQC_FR] = board->sq;
                         board->gBoard[xt][consts::RQC_TO].moved = true;
                     }
                     else if (yt - yf == 2)
                     {
-                        board->gBoard[xt][consts::RKC_TO] = board->gBoard[xt][consts::RKC_FR];
+                        board->gBoard[xt][consts::RKC_TO] =
+                            board->gBoard[xt][consts::RKC_FR];
                         board->gBoard[xt][consts::RKC_FR] = board->sq;
                         board->gBoard[xt][consts::RKC_TO].moved = true;
                     }
-
                 }
 
                 board->flmvCNT++;

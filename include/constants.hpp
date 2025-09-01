@@ -4,8 +4,8 @@ namespace consts
 {
 
     /* -- Board geometry --*/
-    constexpr int ROWS = 8;
-    constexpr int COLS = 8;
+    constexpr int ROWS   = 8;
+    constexpr int COLS   = 8;
 
     constexpr int PR_ROW = 0;
 
@@ -14,11 +14,11 @@ namespace consts
     constexpr int KSC_COL = 6;
     constexpr int QSC_COL = 2;
 
-    constexpr int RKC_FR = 7;
-    constexpr int RKC_TO = 5;
+    constexpr int RKC_FR  = 7;
+    constexpr int RKC_TO  = 5;
 
-    constexpr int RQC_FR = 0;
-    constexpr int RQC_TO = 3;
+    constexpr int RQC_FR  = 0;
+    constexpr int RQC_TO  = 3;
 
     /* --- Algebraic bounds ----*/
     constexpr char FILE_MIN = 'a';
@@ -31,10 +31,10 @@ namespace consts
     constexpr int SPN = 80;
     constexpr int SPL = 3000;
 
-    /* ---- Input lens ----*/
-    constexpr size_t FL_LEN = 4;
-    constexpr size_t PN_LEN = 2;
-    constexpr size_t PR_LEN = 1;
+    /* ------ Input lens -------*/
+    constexpr size_t FL_LEN   = 4;
+    constexpr size_t PN_LEN   = 2;
+    constexpr size_t PR_LEN   = 1;
     constexpr size_t CRSR_LEN = 2;
 
 }

@@ -16,36 +16,40 @@ void Board::syncEval()
             gBoard[r][c].setEval(eval[r][c]);
 }
 
-const Piece& Board::cell(int r, int c) const {
-    static const Piece empty = Square;
-    if (r < 0 || r >= consts::ROWS || c < 0 || c >= consts::COLS) return empty;
-    return gBoard[r][c];
+bool Board::inBounds(int r, int c) const {
+    return r >= 0 && r < consts::ROWS
+        && c >= 0 && c < consts::COLS;
 }
 
+const Piece& Board::cell(int r, int c) const {
+    if (inBounds(r,c))
+    {
+        return gBoard[r][c];
+    }
+    return sq;
+}
 
 void Board::markValid(std::pair<size_t, size_t> from)
 {
-    int r = static_cast<int>(from.first);
-    int c = static_cast<int>(from.second);
-    auto &[ai_r, ai_c] = ai;
+    int r  = static_cast<int>(from.first);
+    int c  = static_cast<int>(from.second);
+    int ar = static_cast<int>(ai.first);
+    int ac = static_cast<int>(ai.second);
 
-    const Piece &p   = gBoard[r][c];
-    const Piece &aiP = gBoard[ai_r][ai_c];
-
-    switch (p.identity)
+    switch (cell(r, c).identity)
     {
     case PAWN:
     {
-        int dir = p.isWhite ? -1 : 1;
+        int dir = cell(r, c).isWhite ? -1 : 1;
 
         int st1 = r + dir;
-        if (st1 >= 0 && st1 < consts::ROWS)
+        if (inBounds(st1, c))
         {
             if (gBoard[st1][c].identity == SQUARE)
                 eval[st1][c] = 1;
 
             int st2 = r + 2*dir;
-            if (!p.moved && st2 >= 0 && st2 < consts::ROWS
+            if (!cell(r, c).moved && inBounds(st2, c)
                 && gBoard[st2][c].identity == SQUARE
                 && gBoard[st1][c].identity == SQUARE)
             {
@@ -53,18 +57,18 @@ void Board::markValid(std::pair<size_t, size_t> from)
             }
         }
 
-        for (auto [dr, dc] : p.deltas)
+        for (auto [dr, dc] : cell(r, c).deltas)
         {
             int nr = r + dr;
             int nc = c + dc;
-            if (nr >= 0 && nr < consts::ROWS && nc >= 0 && nc < consts::COLS)
+            if (inBounds(nr, nc))
             {
-                const Piece &tgt = gBoard[nr][nc];
-                if (!tgt.isme && tgt.identity != SQUARE)
+                if (!cell(nr, nc).isme &&
+                    cell(nr, nc).identity != SQUARE)
                 {
                     eval[nr][nc] = -1;
                 }
-                if (enpAI and ai_r == r and ai_c == nc)
+                if (enpAI and ar == r and ac == nc)
                 {
                     eval[nr][nc] = 1;
                     eval[r][nc] = -1;

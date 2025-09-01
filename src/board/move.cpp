@@ -104,17 +104,19 @@ void Board::processMove(const std::string &input)
             to.first  == consts::CTL_ROW && 
             to.second == consts::KSC_COL)
         {
+            gBoard[consts::CTL_ROW][consts::RKC_TO] = 
+                gBoard[consts::CTL_ROW][consts::RKC_FR];
             gBoard[consts::CTL_ROW][consts::RKC_FR] = sq;
-            gBoard[consts::CTL_ROW][consts::RKC_TO] = r2;
-            r2.moved = true;
+            gBoard[consts::CTL_ROW][consts::RKC_TO].moved = true;
         }
         else if (tmp.OOO &&
             to.first  == consts::CTL_ROW &&
             to.second == consts::QSC_COL)
         {
+            gBoard[consts::CTL_ROW][consts::RQC_TO] = 
+                gBoard[consts::CTL_ROW][consts::RQC_FR];
             gBoard[consts::CTL_ROW][consts::RQC_FR] = sq;
-            gBoard[consts::CTL_ROW][consts::RQC_TO] = r1;
-            r1.moved = true;
+            gBoard[consts::CTL_ROW][consts::RQC_TO].moved = true;
         }
     }
     tmp.moved = true;
@@ -152,11 +154,11 @@ bool Board::tryMove(const std::string &input)
 
     auto hanDest = [&](size_t x, size_t y) -> bool
     {
-        // if (eval[x][y] == 0)
-        // {
-        //     setState(gst::ERRMOVE);
-        //     return false;
-        // }
+        if (eval[x][y] == 0)
+        {
+            setState(gst::ERRMOVE);
+            return false;
+        }
         to = {x, y};
         hfmvCLK++;
         reState();
@@ -170,8 +172,10 @@ bool Board::tryMove(const std::string &input)
                 ? input.substr(2, consts::PN_LEN)
                 : input;
             enpME[1] = isWhite
-                ? static_cast<char>(static_cast<unsigned char>(enpME[1]) - 1)
-                : static_cast<char>(static_cast<unsigned char>(enpME[1]) + 1);
+                ? static_cast<char>(
+                    static_cast<unsigned char>(enpME[1]) - 1)
+                : static_cast<char>(
+                    static_cast<unsigned char>(enpME[1]) + 1);
         }
         else
         {
@@ -192,16 +196,15 @@ bool Board::tryMove(const std::string &input)
             std::tolower(
                 static_cast<unsigned char>(rawFile)));
         char rank = input[i + 1];
+        
+        size_t x = static_cast<size_t>(consts::RANK_MAX - rank); 
+        size_t y = static_cast<size_t>(file - consts::FILE_MIN);  
 
-        if (file < consts::FILE_MIN || file > consts::FILE_MAX ||
-            rank < consts::RANK_MIN || rank > consts::RANK_MAX)
+        if (!inBounds(static_cast<int>(x), static_cast<int>(y)))
         {
             setState(gst::ERRINPUT);
             return false;
         }
-
-        size_t x = static_cast<size_t>(consts::RANK_MAX - rank); 
-        size_t y = static_cast<size_t>(file - consts::FILE_MIN);  
 
         if (i == 0)
         {

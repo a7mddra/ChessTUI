@@ -6,7 +6,7 @@ BIN      := game
 
 SRCS := $(shell find . -type f -name '*.cpp' \
         -not -path "./$(OBJ_DIR)/*" \
-        -not -path "./third-party/stockfish/*")
+        -not -path "./engine/stockfish/*")
 OBJS := $(patsubst ./%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SRCS)))
 DEPS := $(OBJS:.o=.d)
 
