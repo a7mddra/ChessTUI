@@ -67,6 +67,50 @@ void Board::processInput(const std::string &input)
     }
 }
 
+void Board::applyMove(
+    std::pair<size_t, size_t> t, std::pair<size_t, size_t> f)
+{
+    Piece tmp = gBoard[f.first][f.second];
+    gBoard[f.first][f.second] = sq;
+
+    if (tmp.identity == PAWN)
+    {
+        if (f.second != t.second &&
+            gBoard[t.first][t.second].isEmt)
+        {
+            gBoard[f.first][t.second] = sq;
+        }
+    }
+    else if (tmp.identity == KING)
+    {
+        if (tmp.OO && 
+            t.first  == consts::CTL_ROW && 
+            t.second == consts::KSC_COL)
+        {
+            gBoard[consts::CTL_ROW][consts::RKC_TO] = 
+                gBoard[consts::CTL_ROW][consts::RKC_FR];
+            gBoard[consts::CTL_ROW][consts::RKC_FR] = sq;
+            gBoard[consts::CTL_ROW][consts::RKC_TO].isMoved = true;
+            gBoard[consts::CTL_ROW][consts::RKC_TO].setPos(
+                {consts::CTL_ROW, consts::RKC_TO});
+        }
+        else if (tmp.OOO &&
+            t.first  == consts::CTL_ROW &&
+            t.second == consts::QSC_COL)
+        {
+            gBoard[consts::CTL_ROW][consts::RQC_TO] = 
+                gBoard[consts::CTL_ROW][consts::RQC_FR];
+            gBoard[consts::CTL_ROW][consts::RQC_FR] = sq;
+            gBoard[consts::CTL_ROW][consts::RQC_TO].isMoved = true;
+            gBoard[consts::CTL_ROW][consts::RQC_TO].setPos(
+                {consts::CTL_ROW, consts::RQC_TO});
+        }
+    }
+    tmp.isMoved = true;
+    tmp.setPos(t);
+    gBoard[t.first][t.second] = tmp;
+}
+
 void Board::processMove(const std::string &input)
 {
     if (input.length() == consts::PR_LEN and promoting)
@@ -76,51 +120,18 @@ void Board::processMove(const std::string &input)
             std::tolower(
                 static_cast<unsigned char>(input[0])));
         gBoard[to.first][to.second].set(
-            self, isWhite, promos[ch]);
+            self, to, isWhite, promos[ch]);
         promoting = false;
         reState();
         return;
     }
-    
-    Piece tmp = gBoard[from.first][from.second];
-    gBoard[from.first][from.second] = sq;
-
-    if (tmp.identity == PAWN)
+    if (cell(from.first, from.second).identity == PAWN && 
+        to.first == consts::PR_ROW)
     {
-        if (to.first == consts::PR_ROW)
-        {
-            setState(gst::PROMOTION);
-            promoting = true;
-        }
-        if (from.second != to.second &&
-            gBoard[to.first][to.second].identity == SQUARE)
-        {
-            gBoard[from.first][to.second] = sq;
-        }
+        setState(gst::PROMOTION);
+        promoting = true;
     }
-    else if (tmp.identity == KING)
-    {
-        if (tmp.OO && 
-            to.first  == consts::CTL_ROW && 
-            to.second == consts::KSC_COL)
-        {
-            gBoard[consts::CTL_ROW][consts::RKC_TO] = 
-                gBoard[consts::CTL_ROW][consts::RKC_FR];
-            gBoard[consts::CTL_ROW][consts::RKC_FR] = sq;
-            gBoard[consts::CTL_ROW][consts::RKC_TO].moved = true;
-        }
-        else if (tmp.OOO &&
-            to.first  == consts::CTL_ROW &&
-            to.second == consts::QSC_COL)
-        {
-            gBoard[consts::CTL_ROW][consts::RQC_TO] = 
-                gBoard[consts::CTL_ROW][consts::RQC_FR];
-            gBoard[consts::CTL_ROW][consts::RQC_FR] = sq;
-            gBoard[consts::CTL_ROW][consts::RQC_TO].moved = true;
-        }
-    }
-    tmp.moved = true;
-    gBoard[to.first][to.second] = tmp;
+    applyMove(to, from);
 }
 
 bool Board::tryMove(const std::string &input)
@@ -208,11 +219,11 @@ bool Board::tryMove(const std::string &input)
 
         if (i == 0)
         {
-            if (gBoard[x][y].isme)
+            if (gBoard[x][y].isMe)
             {
                 setState(gst::PENDING);
                 from = {x, y};
-                markValid(from);
+                markValid();
             }
             else
             {

@@ -19,15 +19,18 @@ static std::string symbol_for(Identity id, bool white)
 
 void Piece::set(
     std::shared_ptr<Board> board,
+    std::pair<size_t, size_t> ps,
     bool white, const Piece &tpl)
 {
-    isme      = tpl.identity != SQUARE and board->isWhite == white;
     baseSym   = symbol_for(tpl.identity, white);
+    isMe      = !tpl.isEmt and board->isWhite == white;
+    isEmt     = tpl.identity == SQUARE;
     isSliding = tpl.isSliding;
     identity  = tpl.identity;
     deltas    = tpl.deltas;
+    pos       = {-1, -1};
     sym       = baseSym;
-    moved     = false;
+    isMoved   = false;
     OO = OOO  = false;
     isWhite   = white;
     eval      = 0;
@@ -51,13 +54,19 @@ void Piece::setEval(int v)
     }
 }
 
+void Piece::setPos(std::pair<size_t, size_t> ps)
+{
+    pos = ps;
+}
+
 /* -- Canonical piece templates (color-agnostic) -- */
 
 static Piece makePawnTpl()
 {
     Piece p;
     p.identity = PAWN;
-    p.moved = false;
+    p.isMoved = false;
+    p.isEmt = false;
     p.isSliding = false;
     p.deltas = {{ -1, -1 }, { -1, 1 }}; 
     p.baseSym = assets::pieces.at('p');
@@ -69,7 +78,8 @@ static Piece makeRookTpl()
 {
     Piece p;
     p.identity = ROOK;
-    p.moved = false;
+    p.isMoved = false;
+    p.isEmt = false;
     p.isSliding = true;
     p.deltas = {{ 1,  0}, {-1,  0}, { 0,  1}, { 0, -1}};
     p.baseSym = assets::pieces.at('r');
@@ -81,7 +91,8 @@ static Piece makeBishopTpl()
 {
     Piece p;
     p.identity = BISHOP;
-    p.moved = false;
+    p.isMoved = false;
+    p.isEmt = false;
     p.isSliding = true;
     p.deltas = {{ 1,  1}, { 1, -1}, {-1,  1}, {-1, -1}};
     p.baseSym = assets::pieces.at('b');
@@ -93,7 +104,8 @@ static Piece makeKnightTpl()
 {
     Piece p;
     p.identity = KNIGHT;
-    p.moved = false;
+    p.isMoved = false;
+    p.isEmt = false;
     p.isSliding = false;
     p.deltas = {{ 1,  2}, { 2,  1}, {-1,  2}, {-2,  1},
                 { 1, -2}, { 2, -1}, {-1, -2}, {-2, -1}};
@@ -106,7 +118,8 @@ static Piece makeQueenTpl()
 {
     Piece p;
     p.identity = QUEEN;
-    p.moved = false;
+    p.isMoved = false;
+    p.isEmt = false;
     p.isSliding = true;
     p.deltas = {{ 1,  0}, {-1,  0}, { 0,  1}, { 0, -1},
                 { 1,  1}, { 1, -1}, {-1,  1}, {-1, -1}};
@@ -119,7 +132,8 @@ static Piece makeKingTpl()
 {
     Piece p;
     p.identity = KING;
-    p.moved = false;
+    p.isMoved = false;
+    p.isEmt = false;
     p.OO = p.OOO = false;
     p.isSliding = false;
     p.deltas = {{ 1,  0}, {-1,  0}, { 0,  1}, { 0, -1},
@@ -133,7 +147,8 @@ static Piece makeSquareTpl()
 {
     Piece p;
     p.identity = SQUARE;
-    p.moved = false;
+    p.isMoved = false;
+    p.isEmt = true;
     p.isSliding = false;
     p.baseSym = assets::pieces.at('s');
     p.sym = p.baseSym;

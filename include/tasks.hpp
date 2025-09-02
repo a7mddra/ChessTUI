@@ -85,7 +85,7 @@ namespace tasks
                 auto id = pc.identity;
 
                 if (id == PAWN and yf != yt &&
-                    board->gBoard[xt][yt].identity == SQUARE)
+                    board->gBoard[xt][yt].isEmt)
                 {
                     board->gBoard[xf][yt] = board->sq;
                 }
@@ -96,7 +96,8 @@ namespace tasks
                 board->gBoard[xt][yt] =
                     board->gBoard[xf][yf];
                 board->gBoard[xf][yf] = board->sq;
-                board->gBoard[xt][yt].moved = true;
+                board->gBoard[xt][yt].isMoved = true;
+                board->gBoard[xt][yt].setPos({xt, yt});
 
                 if (board->totEMT < board->cntEMT() or id == PAWN)
                 {
@@ -107,7 +108,7 @@ namespace tasks
                 if (prom != '-')
                 {
                     board->gBoard[xt][yt].set(
-                        board, !board->isWhite, board->promos[prom]);
+                        board, {xt, yt}, !board->isWhite, board->promos[prom]);
                 }
 
                 if (id == KING)
@@ -117,14 +118,18 @@ namespace tasks
                         board->gBoard[xt][consts::RQC_TO] =
                             board->gBoard[xt][consts::RQC_FR];
                         board->gBoard[xt][consts::RQC_FR] = board->sq;
-                        board->gBoard[xt][consts::RQC_TO].moved = true;
+                        board->gBoard[xt][consts::RQC_TO].isMoved = true;
+                        board->gBoard[xt][consts::RQC_TO].setPos(
+                            {xt, consts::RQC_TO});
                     }
                     else if (yt - yf == 2)
                     {
                         board->gBoard[xt][consts::RKC_TO] =
                             board->gBoard[xt][consts::RKC_FR];
                         board->gBoard[xt][consts::RKC_FR] = board->sq;
-                        board->gBoard[xt][consts::RKC_TO].moved = true;
+                        board->gBoard[xt][consts::RKC_TO].isMoved = true;
+                        board->gBoard[xt][consts::RKC_TO].setPos(
+                            {xt, consts::RKC_TO});
                     }
                 }
 

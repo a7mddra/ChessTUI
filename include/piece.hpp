@@ -52,18 +52,20 @@ struct Piece
     /* Core identity + display */
     Identity identity = SQUARE;
     bool isWhite = false;
-    std::string baseSym;                     ///< original glyph (uncolored)
-    std::string sym;                         ///< glyph ready for printing (may be colored)
+    bool isEmt = true;
+    std::string baseSym;                     
+    std::string sym;
+    std::pair<size_t, size_t> pos = {-1, -1};                         
 
     /* Stateful chess flags */
-    int eval = 0;                            ///< 1 = valid move highlight, -1 = attackable, 0 = none
-    bool isme = false;                       ///< valid piece picking 
-    bool moved = false;                      ///< has this piece moved (useful for castling/pawn two-step)
-    bool OO = false, OOO = false;            ///< king castling rights (temporary flags)
+    int eval = 0;                            
+    bool isMe = false;                       
+    bool isMoved = false;                    
+    bool OO = false, OOO = false;            
 
     /* Movement metadata */
-    bool isSliding = false;                  ///< true for Rook/Bishop/Queen
-    std::vector<std::pair<int,int>> deltas;  ///< direction offsets (row,col) or knight jumps
+    bool isSliding = false;                  
+    std::vector<std::pair<int,int>> deltas;  
 
     /* --------------------- methods --------------------- */
 
@@ -75,13 +77,21 @@ struct Piece
      * Copies movement metadata and flags from `tpl`, then applies `white` color
      * and sets the position `p`. `baseSym` / `sym` pick the correct glyph for color.
      */
-    void set(std::shared_ptr<Board> board, bool white, const Piece &tpl);
+    void set(std::shared_ptr<Board> board,
+         std::pair<size_t, size_t> ps,
+         bool white, const Piece &tpl);
 
     /**
      * @brief Set evaluation marker for display.
      * @param v 1 -> valid move (highlight glyph), -1 -> attack (red), 0 -> normal
      */
     void setEval(int v);
+
+    /**
+     * @brief Set position of the piece.
+     * @param r, c -> row, and col.
+     */
+    void setPos(std::pair<size_t, size_t> ps);
 };
 
 /* Canonical templates declared here; definitions live in src/piece.cpp.

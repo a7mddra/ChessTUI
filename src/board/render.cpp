@@ -44,7 +44,8 @@ void Board::printBoard()
         if (!isWhite)
             std::reverse(tokens.begin(), tokens.end());
 
-        std::string row = std::to_string(consts::ROWS - r) + " ";
+        std::string row = std::to_string(
+            consts::ROWS - r) + " ";
         for (auto &t : tokens) row += t;
         pBoard.emplace_back(std::move(row));
     }
@@ -54,7 +55,8 @@ void Board::printBoard()
     {
         char file = isWhite ? (consts::FILE_MIN + c)
                             : (consts::FILE_MAX - c);
-        footer += static_cast<char>(std::toupper(static_cast<unsigned char>(file)));
+        footer += static_cast<char>(std::toupper(
+            static_cast<unsigned char>(file)));
         footer += ' ';
     }
 

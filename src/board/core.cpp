@@ -16,22 +16,25 @@ void Board::init()
             &R1, &N1, &B1, &QQ, &KK, &B2, &N2, &R2 };
         const Piece white_back_tpls[] = {
             Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook };
-        for (size_t i = 0; i < std::size(white_back); ++i)
-            white_back[i]->set(self, true, white_back_tpls[i]);
+        for (size_t i = 0; i < consts::COLS; ++i)
+            white_back[i]->set(
+                self, {consts::ROWS - 1, i}, true, white_back_tpls[i]);
     }
 
     {
         Piece* white_pawns[] = { 
             &P1, &P2, &P3, &P4, &P5, &P6, &P7, &P8 };
-        for (auto pptr : white_pawns)
-            pptr->set(self, true, Pawn);
+        for (size_t i = 0; i < consts::COLS; ++i)
+            white_pawns[i]->set(
+                self, {consts::ROWS - 2, i}, true, Pawn);
     }
     
     {
         Piece* black_pawns[] = { 
             &p1, &p2, &p3, &p4, &p5, &p6, &p7, &p8 };
-        for (auto pptr : black_pawns)
-            pptr->set(self, false, Pawn);
+        for (size_t i = 0; i < consts::COLS; ++i)
+            black_pawns[i]->set(
+                self, {consts::PR_ROW + 1, i}, false, Pawn);
     }
 
     {
@@ -39,11 +42,12 @@ void Board::init()
             &r1, &n1, &b1, &qq, &kk, &b2, &n2, &r2 };
         const Piece black_back_tpls[] = {
             Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook };
-        for (size_t i = 0; i < std::size(black_back); ++i)
-            black_back[i]->set(self, false, black_back_tpls[i]);
+        for (size_t i = 0; i < consts::COLS; ++i)
+            black_back[i]->set(
+                self, {consts::PR_ROW, i}, false, black_back_tpls[i]);
     }
     
-    sq.set(self, false, Square);
+    sq.set(self, {-1, -1}, false, Square);
     
     gBoard = {
         { r1, n1, b1, qq, kk, b2, n2, r2 },   
@@ -111,13 +115,13 @@ std::string Board::genFEN()
     fen += isWhite ? " w " : " b ";
 
     std::string cast;
-    if (!KK.moved && !R2.moved)
+    if (!KK.isMoved && !R2.isMoved)
         cast += 'K';
-    if (!KK.moved && !R1.moved)
+    if (!KK.isMoved && !R1.isMoved)
         cast += 'Q';
-    if (!kk.moved && !r2.moved)
+    if (!kk.isMoved && !r2.isMoved)
         cast += 'k';
-    if (!kk.moved && !r1.moved)
+    if (!kk.isMoved && !r1.isMoved)
         cast += 'q';
     if (!cast.size())
         cast = "-";
