@@ -5,68 +5,6 @@
 #include "console.hpp"
 #include "parallel.hpp"
 
-void Board::readLine()
-{
-    std::string prompt = assets::cursor;
-    prompt += std::string(
-         + promoting
-        ? consts::PR_LEN
-        : consts::FL_LEN, ' ');
-    std::string line = std::string(
-        padd(prompt), ' ');
-    line += color::orange(assets::cursor);
-    std::cout << line;
-    std::string input;
-    std::getline(std::cin, input);
-    processInput(input);
-}
-
-void Board::processInput(const std::string &input)
-{
-    if (input == "quit")
-    {
-        setState(gst::EXITING);
-        return;
-    }
-
-    if (input == "flip")
-    {
-        isWhite = !isWhite;
-        init(); 
-        return;
-    }
-
-    if (input == "new")
-    {
-        init();
-        return;
-    }
-
-    /*debug*/
-    if (input == "fen")
-    {
-        log.assign({genFEN()});
-        return;
-    }
-
-    if (!tryMove(input))
-    {
-        return;
-    }
-
-    if (state != gst::PENDING)
-    {
-        processMove(input);
-        if (state != gst::PROMOTION)
-        {    
-            auto self = shared_from_this();
-            parallel::runParallel(
-                tasks::makeSpinner(self),
-                tasks::makeAI(self));
-        }
-    }
-}
-
 void Board::applyMove(
     std::pair<size_t, size_t> t, std::pair<size_t, size_t> f)
 {

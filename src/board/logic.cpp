@@ -2,185 +2,15 @@
 #include "assets.hpp"
 #include "constants.hpp"
 
-void Board::reState()
-{
-    // check for check, checkmate, stalemate, draw
-    setState(gst::INPUT);
-}
-
 void Board::syncEval()
 {
     for (int r = 0; r < consts::ROWS; ++r)
+    {
         for (int c = 0; c < consts::COLS; ++c)
+        {
             gBoard[r][c].setEval(eval[r][c]);
-}
-
-bool Board::inBounds(int r, int c) const
-{
-    return r >= 0 && r < consts::ROWS && c >= 0 && c < consts::COLS;
-}
-
-bool Board::isSafe(const Piece &p)
-{
-    int r = static_cast<int>(p.pos.first);
-    int c = static_cast<int>(p.pos.second);
-
-    for (auto [dr, dc] : Knight.deltas)
-    {
-        int nr = r + dr;
-        int nc = c + dc;
-        if (inBounds(nr, nc) and !cell(nr, nc).isMe)
-        {
-            if (cell(nr, nc).identity == KNIGHT)
-            {
-                return false;
-            }
         }
     }
-
-    int inc = 1;
-    while(inc < consts::ROWS)
-    {
-        //up
-        if (inBounds(r-inc, c) and !cell(r-inc, c).isMe)
-        {
-            if (cell(r-inc, c).isSliding &&
-                cell(r-inc, c).identity != BISHOP)
-            {
-                return false;
-            }
-            if (cell(r-inc, c).identity == KING)
-            {
-                return false;
-            }             
-        }
-
-        //down
-        if (inBounds(r+inc, c) and !cell(r+inc, c).isMe)
-        {
-            if (cell(r+inc, c).isSliding &&
-                cell(r+inc, c).identity != BISHOP)
-            {
-                return false;
-            }
-            if (cell(r+inc, c).identity == KING)
-            {
-                return false;
-            } 
-        }
-
-        //left
-        if (inBounds(r, c-inc) and !cell(r, c-inc).isMe)
-        {
-            if (cell(r, c-inc).isSliding &&
-                cell(r, c-inc).identity != BISHOP)
-            {
-                return false;
-            }
-            if (cell(r, c-inc).identity == KING)
-            {
-                return false;
-            } 
-        }
-
-        //right
-        if (inBounds(r, c+inc) and !cell(r, c+inc).isMe)
-        {
-            if (cell(r, c+inc).isSliding &&
-                cell(r, c+inc).identity != BISHOP)
-            {
-                return false;
-            }
-            if (cell(r, c+inc).identity == KING)
-            {
-                return false;
-            } 
-        }
-
-        //up-right
-        if (inBounds(r-inc, c+inc) and !cell(r-inc, c+inc).isMe)
-        {
-            if (cell(r-inc, c+inc).isSliding &&
-                cell(r-inc, c+inc).identity != ROOK)
-            {
-                return false;
-            }
-            if (isWhite and cell(r-inc, c+inc).identity == PAWN)
-            {
-                return false;
-            }
-            if (cell(r-inc, c+inc).identity == KING)
-            {
-                return false;
-            }    
-        }
-
-        //up-left
-        if (inBounds(r-inc, c-inc) and !cell(r-inc, c-inc).isMe)
-        {
-            if (cell(r-inc, c-inc).isSliding &&
-                cell(r-inc, c-inc).identity != ROOK)
-            {
-                return false;
-            }
-            if (isWhite and cell(r-inc, c-inc).identity == PAWN)
-            {
-                return false;
-            }
-            if (cell(r-inc, c-inc).identity == KING)
-            {
-                return false;
-            }                
-        }
-
-        //down-right
-        if (inBounds(r+inc, c+inc) and !cell(r+inc, c+inc).isMe)
-        {
-            if (cell(r+inc, c+inc).isSliding &&
-                cell(r+inc, c+inc).identity != ROOK)
-            {
-                return false;
-            }
-            if (!isWhite and cell(r+inc, c+inc).identity == PAWN)
-            {
-                return false;
-            }
-            if (cell(r+inc, c+inc).identity == KING)
-            {
-                return false;
-            }            
-        }
-
-        //down-left
-        if (inBounds(r+inc, c-inc) and !cell(r+inc, c-inc).isMe)
-        {
-            if (cell(r+inc, c-inc).isSliding &&
-                cell(r+inc, c-inc).identity != ROOK)
-            {
-                return false;
-            }
-            if (!isWhite and cell(r+inc, c-inc).identity == PAWN)
-            {
-                return false;
-            }
-            if (cell(r+inc, c-inc).identity == KING)
-            {
-                return false;
-            }
-        }
-
-        inc++;
-    }
-    return true;
-}
-
-const Piece &Board::cell(int r, int c) const
-{
-    if (inBounds(r, c))
-    {
-        return gBoard[r][c];
-    }
-    return sq;
 }
 
 void Board::setEval(int r, int c, int v)
@@ -194,6 +24,92 @@ void Board::setEval(int r, int c, int v)
     gBoard = cpy;
 }
 
+bool Board::isSafe(const Piece &p)
+{
+    int r = static_cast<int>(p.pos.first);
+    int c = static_cast<int>(p.pos.second);
+
+    for (auto [dr, dc] : Knight.deltas)
+    {
+        int nr = r + dr;
+        int nc = c + dc;
+        if (!inBounds(nr, nc))
+        {
+            continue;
+        }
+        if (!cell(nr, nc).isMe &&
+            cell(nr, nc).identity == KNIGHT)
+        {
+            return false;
+        }
+    }
+
+    for (auto [dr, dc] : King.deltas)
+    {
+        int inc = 1;
+        while (inc < consts::ROWS)
+        {
+            int nr = r + dr * inc;
+            int nc = c + dc * inc;
+
+            if (!inBounds(nr, nc))
+            {
+                break;
+            }
+
+            const Piece &tar = cell(nr, nc);
+            if (tar.isMe)
+            {
+                break;
+            }
+
+            if (!tar.isMe && !tar.isEmt)
+            {
+                bool isDiag = (dr != 0 && dc != 0);
+
+                if (tar.identity == QUEEN)
+                {
+                    return false;
+                }
+
+                if (inc == 1 && tar.identity == KING)
+                {
+                    return false;
+                }
+
+                if (isDiag)
+                {
+                    if (inc == 1 && tar.identity == PAWN)
+                    {
+                        bool dn = !tar.isWhite && dr == 1;
+                        bool up = tar.isWhite && dr == -1;
+
+                        if (dn || up)
+                        {
+                            return false;
+                        }
+                    }
+                    if (tar.identity == BISHOP)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (tar.identity == ROOK)
+                    {
+                        return false;
+                    }
+                }
+                break;
+            }
+            inc++;
+        }
+    }
+
+    return true;
+}
+
 void Board::markValid()
 {
     int r = static_cast<int>(from.first);
@@ -201,12 +117,13 @@ void Board::markValid()
     int ar = static_cast<int>(ai.first);
     int ac = static_cast<int>(ai.second);
 
-    switch (cell(r, c).identity)
+    auto id = cell(r, c).identity;
+    int dir = cell(r, c).isWhite ? -1 : 1;
+
+    switch (id)
     {
     case PAWN:
     {
-        int dir = cell(r, c).isWhite ? -1 : 1;
-
         int st1 = r + dir;
         if (inBounds(st1, c))
         {
@@ -221,97 +138,79 @@ void Board::markValid()
                 setEval(st2, c, 1);
             }
         }
+    }
 
-        for (auto [dr, dc] : cell(r, c).deltas)
+    case KING:
+    {
+        if (isSafe(cell(r, c)))
         {
-            int nr = r + dr;
-            int nc = c + dc;
-            if (inBounds(nr, nc))
+            auto ksc = cell(consts::CTL_ROW, consts::KSC_COL);
+            auto rkc = cell(consts::CTL_ROW, consts::RKC_TO);
+            auto qsc = cell(consts::CTL_ROW, consts::QSC_COL);
+            auto rqc = cell(consts::CTL_ROW, consts::RQC_TO);
+            auto chk = [&](Piece &p) -> bool
             {
-                if (!cell(nr, nc).isMe &&
-                    !cell(nr, nc).isEmt)
-                {
-                    setEval(nr, nc, -1);
-                }
-                if (enpAI and ar == r and ac == nc)
-                {
-                    setEval(nr, nc, 1);
-                    setEval(r, nc, -1);
-                }
+                return p.isEmt && isSafe(p);
+            };
+            if (chk(ksc) and chk(rkc))
+            {
+                setEval(consts::CTL_ROW, consts::KSC_COL, 1);
+            }
+            if (chk(qsc) and chk(rqc))
+            {
+                setEval(consts::CTL_ROW, consts::QSC_COL, 1);
             }
         }
-        break;
     }
 
     default:
     {
         for (auto [dr, dc] : cell(r, c).deltas)
         {
+            dr *= dir;
+            dc *= dir;
             int nr = r + dr;
             int nc = c + dc;
             if (inBounds(nr, nc))
             {
+                if (!cell(nr, nc).isMe && !cell(nr, nc).isEmt)
+                {
+                    setEval(nr, nc, -1);
+                }
+                if (id == PAWN)
+                {
+                    if (enpAI and ar == r and ac == nc)
+                    {
+                        setEval(nr, nc, 1);
+                        setEval(r, nc, -1);
+                    }
+                    continue;
+                }
                 if (cell(nr, nc).isEmt)
                 {
                     setEval(nr, nc, 1);
                 }
-                else if (!cell(nr, nc).isMe)
+                if (cell(r, c).isSliding)
                 {
-                    setEval(nr, nc, -1);
-                }
-
-            case KNIGHT:
-            {
-                break;
-            }
-
-            case KING:
-            {
-                if (isSafe(cell(r, c)))
-                {
-                    auto ksc = cell(consts::CTL_ROW, consts::KSC_COL);
-                    auto rkc = cell(consts::CTL_ROW, consts::RKC_TO);
-                    auto qsc = cell(consts::CTL_ROW, consts::QSC_COL);
-                    auto rqc = cell(consts::CTL_ROW, consts::RQC_TO);
-                    auto chk = [&](Piece &p) -> bool
+                    int sr = nr + dr;
+                    int sc = nc + dc;
+                    while (inBounds(sr, sc))
                     {
-                        return p.isEmt && isSafe(p);
-                    };
-                    if (chk(ksc) and chk(rkc))
-                    {
-                        setEval(consts::CTL_ROW, consts::KSC_COL, 1);
-                    }
-                    if (chk(qsc) and chk(rqc))
-                    {
-                        setEval(consts::CTL_ROW, consts::QSC_COL, 1);
-                    }
-                }
-                break;
-            }
-            
-            if (cell(r, c).isSliding)
-            {
-                int inc = 1;
-                while (inBounds(nr + dr * inc, nc + dc * inc))
-                {
-                    int sr = nr + dr * inc;
-                    int sc = nc + dc * inc;
-                    if (cell(sr, sc).isEmt)
-                    {
-                        setEval(sr, sc, 1);
-                    }
-                    else
-                    {
-                        if (!cell(sr, sc).isMe)
+                        if (cell(sr, sc).isEmt)
                         {
-                            setEval(sr, sc, -1);
+                            setEval(sr, sc, 1);
                         }
-                        break;
+                        else
+                        {
+                            if (!cell(sr, sc).isMe)
+                            {
+                                setEval(sr, sc, -1);
+                            }
+                        }
+                        sr += dr;
+                        sc += dc;
                     }
-                    inc++;
                 }
-            }
-            break;
             }
         }
         break;
