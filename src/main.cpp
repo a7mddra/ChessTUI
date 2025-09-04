@@ -1,8 +1,9 @@
-#include <iostream>
+#include "game/board.hpp"
 
 int main()
 {
-    std::cout<<"Hello World";
-
+    auto board = std::make_shared<Board>();
+    board->init();
+    board->run();
     return 0;
 }

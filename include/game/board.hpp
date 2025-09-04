@@ -1,0 +1,9 @@
+#pragma once
+
+#include <memory>
+
+enum class gst
+{
+    INPUT, ERRAI, ERRMOVE, ERRINPUT, DRAW, CHECK, CHECKMATE,
+    STALEMATE, PROMOTION, PENDING, LOADING, EXITING, THINKING
+};

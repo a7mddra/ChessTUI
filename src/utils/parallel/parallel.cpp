@@ -12,7 +12,9 @@ namespace parallel
     {
 #ifdef __linux__
         if (core < 0)
+        {
             return;
+        }
         cpu_set_t cpuset;
         CPU_ZERO(&cpuset);
         CPU_SET(core, &cpuset);
@@ -26,7 +28,9 @@ namespace parallel
     {
 #ifdef __linux__
         if (core < 0)
+        {
             return;
+        }
         cpu_set_t cpuset;
         CPU_ZERO(&cpuset);
         CPU_SET(core, &cpuset);
@@ -46,7 +50,9 @@ namespace parallel
             {
                 setAffinitySelf(coreA);
                 if (taskA)
+                {
                     taskA();
+                }
             });
 
         std::thread threadB(
@@ -54,16 +60,22 @@ namespace parallel
             {
                 setAffinitySelf(coreB);
                 if (taskB)
+                {
                     taskB();
+                }
             });
 
         setAffinity(threadA, coreA);
         setAffinity(threadB, coreB);
 
         if (threadA.joinable())
+        {
             threadA.join();
+        }
         if (threadB.joinable())
+        {
             threadB.join();
+        }
     }
 
 }
