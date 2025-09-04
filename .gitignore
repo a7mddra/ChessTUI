@@ -1,5 +1,5 @@
 .vscode/
 build/
-src/engine/stockfish/stockfish/
+src/engine/binary/stockfish-ubuntu-x86-64-avx2
 debug.txt
 Game
