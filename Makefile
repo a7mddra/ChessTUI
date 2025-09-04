@@ -2,11 +2,11 @@ CXX      := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -g -Iinclude -MMD -MP
 
 OBJ_DIR  := build
-BIN      := game
+BIN      := Game
 
 SRCS := $(shell find . -type f -name '*.cpp' \
         -not -path "./$(OBJ_DIR)/*" \
-        -not -path "./engine/stockfish/*")
+        -not -path "./src/engine/stockfish/*")
 OBJS := $(patsubst ./%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SRCS)))
 DEPS := $(OBJS:.o=.d)
 

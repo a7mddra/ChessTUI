@@ -1,5 +1,4 @@
 .vscode/
 build/
-engine/stockfish/
-game
-debug.txt
+src/engine/stockfish/
+Game
