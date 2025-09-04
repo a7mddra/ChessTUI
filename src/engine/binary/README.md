@@ -19,16 +19,15 @@ wget https://github.com/official-stockfish/Stockfish/releases/latest/download/st
 # Extract the archive
 tar -xf stockfish-ubuntu-x86-64-avx2.tar
 
-# Create project engine folder (if not present) and copy the binary into the project
-mkdir -p ~/ChessTUI/src/engine/binary
+# Copy the binary into your cloned repository
 cp stockfish-ubuntu-x86-64-avx2/stockfish/stockfish-ubuntu-x86-64-avx2 \
-   ~/ChessTUI/src/engine/binary/
+   path/to/your/cloned/repository/src/engine/binary/
 ````
 
 The binary will be located at:
 
 ```
-~/ChessTUI/src/engine/binary/stockfish-ubuntu-x86-64-avx2
+path/to/your/cloned/repository/src/engine/binary/stockfish-ubuntu-x86-64-avx2
 ```
 
 ---
@@ -38,7 +37,7 @@ The binary will be located at:
 Verify the engine is functional:
 
 ```bash
-cd ~/ChessTUI/src/engine/binary
+cd path/to/your/cloned/repository/src/engine/binary
 # Ensure the binary is executable
 chmod +x stockfish-ubuntu-x86-64-avx2
 
