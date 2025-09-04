@@ -1,13 +1,17 @@
-# Stockfish Integration Guide
+## Quick Start with [Stockfish](https://stockfishchess.org) 🐟
 
-This project depends on the [Stockfish](https://stockfishchess.org) chess engine.  
-The engine binary is **not distributed** with this repository and must be obtained and installed manually.
+> [!NOTE]  
+> Please note that the engine binary is **not distributed** with this repository and must be obtained and installed manually.
+
+> [!WARNING]
+> You do not need to download the full source code for the engine just you need the binary.
+
+> [!TIP]  
+> If you wish to use another engine, we recommend to verfy that it supports FEN (Forsyth-Edwards Notation) not PGN.
 
 ---
 
-## 1. Installation (Ubuntu)
-
-Run the following commands in a terminal:
+### 1. Installation (Ubuntu) ⚙️
 
 ```bash
 # Navigate to the Downloads directory
@@ -22,7 +26,7 @@ tar -xf stockfish-ubuntu-x86-64-avx2.tar
 # Copy the binary into your cloned repository
 cp stockfish-ubuntu-x86-64-avx2/stockfish/stockfish-ubuntu-x86-64-avx2 \
    path/to/your/cloned/repository/src/engine/binary/
-````
+```
 
 The binary will be located at:
 
@@ -32,7 +36,7 @@ path/to/your/cloned/repository/src/engine/binary/stockfish-ubuntu-x86-64-avx2
 
 ---
 
-## 2. Verification
+### 2. Verification 🔍
 
 Verify the engine is functional:
 
@@ -60,8 +64,6 @@ If the engine responds with `uciok`, `readyok`, and outputs a move after `go`, t
 
 ---
 
-## 3. Notes & Licensing
+### 3. Licensing 📜
 
-* The Stockfish binary is **excluded from version control** via `.gitignore`. Do **not** commit engine binaries to the repository.
-* Only the binary is required to run this project; the Stockfish source code is not necessary.
-* For full license terms, see the Stockfish license: [GNU GPL v3](https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt).
+* see the Stockfish license: [GNU GPL v3](https://github.com/official-stockfish/Stockfish/blob/master/Copying.txt).
