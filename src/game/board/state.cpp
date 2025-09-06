@@ -10,5 +10,6 @@ void Board::setState(gst st)
 void Board::reState()
 {
     // check for check, checkmate, stalemate, draw
+    // set isOver
     setState(gst::INPUT);
 }

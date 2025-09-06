@@ -6,7 +6,8 @@
 
 Board::Board()
     : processing(false),
-      promoting(false) {}
+      promoting(false),
+      isOver(false) {}
 
 void Board::init()
 {
@@ -159,7 +160,7 @@ void Board::processInput()
     }
     /*-----------------------*/
 
-    if (!tryMove())
+    if (!tryMove() or isOver)
     {
         return;
     }

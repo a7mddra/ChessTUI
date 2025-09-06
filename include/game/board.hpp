@@ -64,7 +64,7 @@ public:
     int aiScore;
 
     std::atomic<bool> processing;
-    bool promoting;
+    bool promoting, isOver;
 
     Pos from, to, enpAI;
     Piece* cell(Pos p) const;
