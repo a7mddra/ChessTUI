@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "game/board.hpp"
+#include "game/consts.hpp"
 
 namespace tasks
 {
@@ -38,7 +39,7 @@ namespace tasks
         {
             try
             {
-                std::string fen = board->genFEN();
+                // std::string fen = board->genFEN();
                 std::string resp;
 
                 /*

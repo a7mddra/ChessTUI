@@ -12,23 +12,6 @@
 
 #include "piece.hpp"
 
-enum class gst
-{
-    INPUT,
-    ERRAI,
-    ERRMOVE,
-    ERRINPUT,
-    DRAW,
-    CHECK,
-    CHECKMATE,
-    STALEMATE,
-    PROMOTION,
-    PENDING,
-    LOADING,
-    EXITING,
-    THINKING
-};
-
 using Pos = std::pair<size_t, size_t>;
 
 struct PosHash {
@@ -67,7 +50,7 @@ public:
     void printSplash();
     void printLog();
 
-    std::string genFEN();
+    // std::string genFEN();
     std::string enpME;
     int cntEmpty();
     int totEmpty;

@@ -66,6 +66,7 @@ void Board::init()
     };
 
     reState();
+    syncPos();
     enpAI    = {-1, -1};
     enpME    = "-";
     hfmvCLK  = 0;
@@ -137,7 +138,7 @@ void Board::processInput()
     /*-------- debug --------*/
     if (input == "fen")
     {
-        log.assign({genFEN()});
+        // log.assign({genFEN()});
         return;
     }
     /*-----------------------*/
