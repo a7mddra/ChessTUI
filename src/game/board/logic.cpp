@@ -21,11 +21,6 @@ bool Board::isEmpty(Pos p) const
     return cell(p) == nullptr;
 }
 
-bool Board::isEnemy(Pos p) const
-{
-    return cell(p) && !cell(p)->isMe;
-}
-
 template <typename F>
 void Board::forEachCell(F f)
 {
@@ -58,16 +53,16 @@ void Board::syncEval()
 
 void Board::setEval(Pos t, int v)
 {
-    auto f   = from;
-    auto pc  = cell(f);
+    auto f = from;
+    auto pc = cell(f);
     auto cap = cell(t);
-    
+
     // simulate
     pMap.erase(f);
     pMap.erase(t);
     pc->setPos(t);
     pMap[t] = pc;
-    
+
     // evaluate
     if (isSafe(KK))
     {
@@ -89,17 +84,18 @@ bool Board::isSafe(const Piece &pc)
 {
     int r = static_cast<int>(pc.pos.first);
     int c = static_cast<int>(pc.pos.second);
+
     for (auto [dr, dc] : Knight.deltas)
     {
         int nr = r + dr;
         int nc = c + dc;
         Pos ps = {nr, nc};
 
-        if (!inRange(ps))
+        if (!inRange(ps) or !cell(ps))
         {
             continue;
         }
-        if (isEnemy(ps) && cell(ps)->identity == KNIGHT)
+        if (cell(ps)->identity == KNIGHT && !cell(ps)->isMe)
         {
             return false;
         }
@@ -118,44 +114,54 @@ bool Board::isSafe(const Piece &pc)
             {
                 break;
             }
-            if (isEnemy(ps))
+
+            else if (isEmpty(ps))
             {
-                bool isDiag = (dr != 0 && dc != 0);
+                inc++;
+                continue;
+            }
 
-                if (cell(ps)->identity == QUEEN)
-                {
-                    return false;
-                }
-
-                if (inc == 1 && cell(ps)->identity == KING)
-                {
-                    return false;
-                }
-
-                if (isDiag)
-                {
-                    if (inc == 1 && cell(ps)->identity == PAWN)
-                    {
-                        if (dr == -1)
-                        {
-                            return false;
-                        }
-                    }
-                    if (cell(ps)->identity == BISHOP)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (cell(ps)->identity == ROOK)
-                    {
-                        return false;
-                    }
-                }
+            if (cell(ps)->isMe)
+            {
                 break;
             }
-            inc++;
+
+            bool isDiag = (dr != 0 && dc != 0);
+
+            if (cell(ps)->identity == QUEEN)
+            {
+                return false;
+            }
+
+            if (inc == 1 && cell(ps)->identity == KING)
+            {
+                return false;
+            }
+
+            if (isDiag)
+            {
+
+                if (inc == 1 && cell(ps)->identity == PAWN)
+                {
+                    if (dr == -1)
+                    {
+                        return false;
+                    }
+                }
+                if (cell(ps)->identity == BISHOP)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (cell(ps)->identity == ROOK)
+                {
+                    return false;
+                }
+            }
+
+            break;
         }
     }
 
@@ -173,16 +179,14 @@ void Board::markValid()
     case PAWN:
     {
         int st1 = r - 1;
-        if (inRange({st1, c}))
+        int st2 = r - 2;
+        if (inRange({st1, c}) && isEmpty({st1, c}))
         {
-            if (isEmpty({st1, c}))
+            setEval({st1, c}, 1);
+            if (!cell(from)->isMoved &&
+                inRange({st2, c}) && isEmpty({st2, c}))
             {
-                setEval({st1, c}, 1);
-                int st2 = st1 - 1;
-                if (!cell(from)->isMoved && isEmpty({st2, c}))
-                {
-                    setEval({st2, c}, 1);
-                }
+                setEval({st2, c}, 1);
             }
         }
         goto def;
@@ -190,34 +194,47 @@ void Board::markValid()
 
     case KING:
     {
-        if (isSafe(KK))
+        if (isSafe(KK) and !KK.isMoved)
         {
             Pos ksc = {consts::CTL_ROW, consts::KSC_COL};
             Pos rkc = {consts::CTL_ROW, consts::RKC_TO};
             Pos qsc = {consts::CTL_ROW, consts::QSC_COL};
             Pos rqc = {consts::CTL_ROW, consts::RQC_TO};
+            Pos eqc = {consts::CTL_ROW, consts::EQC_COL};
 
             auto chk = [&](Pos pos) -> bool
             {
-                auto [r, c] = pos;
-                syncPos();
-                Piece pc = gBoard[r][c];
-                return isEmpty(pos) && isSafe(pc);
+                Piece p;
+                p.setPos(pos);
+                return isEmpty(pos) && isSafe(p);
             };
-            if (chk(ksc) and chk(rkc))
+
+            if (!R1.isMoved and chk(qsc) and chk(rqc) and isEmpty(eqc))
             {
-                setEval({consts::CTL_ROW, consts::KSC_COL}, 1);
+                setEval(qsc, 1);
             }
-            if (chk(qsc) and chk(rqc))
+            if (!R2.isMoved and chk(ksc) and chk(rkc))
             {
-                setEval({consts::CTL_ROW, consts::QSC_COL}, 1);
+                setEval(ksc, 1);
             }
         }
+        [[fallthrough]];
     }
 
     default:
     def:
     {
+        auto evalu = [&](Pos ps) -> void
+        {
+            if (isEmpty(ps))
+            {
+                setEval(ps, 1);
+            }
+            else if (!cell(ps)->isMe)
+            {
+                setEval(ps, -1);
+            }
+        };
         for (auto [dr, dc] : cell(from)->deltas)
         {
             int nr = r + dr;
@@ -225,10 +242,6 @@ void Board::markValid()
             Pos ps = {nr, nc};
             if (inRange(ps))
             {
-                if (isEnemy(ps))
-                {
-                    setEval(ps, -1);
-                }
                 if (id == PAWN)
                 {
                     if (enpAI == ps)
@@ -236,37 +249,30 @@ void Board::markValid()
                         setEval(ps, 1);
                         setEval({r, nc}, -1);
                     }
+                    if (cell(ps) && !cell(ps)->isMe)
+                    {
+                        setEval(ps, -1);
+                    }
                     continue;
-                }
-                if (isEmpty(ps))
-                {
-                    setEval(ps, 1);
                 }
                 if (cell(from)->isSliding)
                 {
-                    ps = {nr + dr, nc + dc};
-                    while (inRange(ps))
+                    Pos pi = ps;
+                    while (inRange(pi) && isEmpty(pi))
                     {
-                        if (isEmpty(ps))
-                        {
-                            setEval(ps, 1);
-                        }
-                        else
-                        {
-                            if (isEnemy(ps))
-                            {
-                                setEval(ps, -1);
-                            }
-                        }
-                        ps.first  += dr;
-                        ps.second += dc;
+                        evalu(pi);
+                        pi.first += dr;
+                        pi.second += dc;
                     }
+                    continue;
                 }
+                evalu(ps);
             }
         }
         break;
     }
     }
+    
     syncEval();
 }
 

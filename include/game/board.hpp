@@ -7,6 +7,7 @@
 #include <thread>
 #include <chrono>
 #include <utility>
+#include <iomanip>
 #include <algorithm>
 #include <unordered_map>
 
@@ -46,6 +47,9 @@ public:
     void setState(gst st);
     std::vector<std::string> log;
 
+    std::vector<std::string> myLost;
+    std::vector<std::string> aiLost;
+
     void printContent();
     void printSplash();
     void printLog();
@@ -56,6 +60,8 @@ public:
     int totEmpty;
     int hfmvCLK;
     int flmvCNT;
+    int myScore;
+    int aiScore;
 
     std::atomic<bool> processing;
     bool promoting;
@@ -67,7 +73,6 @@ public:
     std::unordered_map<Pos, Piece *, PosHash> pMap;
 
     bool isEmpty(Pos p) const;
-    bool isEnemy(Pos p) const;
     bool inRange(Pos p) const;
 
     template <typename F>

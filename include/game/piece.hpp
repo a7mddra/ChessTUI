@@ -19,11 +19,10 @@
 
 #include <string>
 #include <vector>
-#include <memory>
-#include <utility>
 #include <limits>
 
 #include "assets.hpp"
+using Pos = std::pair<size_t, size_t>;
 
 class Board;
 
@@ -54,7 +53,7 @@ struct Piece
     Identity identity = SQUARE;
     std::string baseSym;
     std::string sym;
-    std::pair<size_t, size_t> pos = {-1, -1};
+    Pos pos = {-1, -1};
 
     /* Stateful chess flags */
     int eval = 0;                            
@@ -79,8 +78,7 @@ struct Piece
      * Copies movement metadata and flags from `tpl`, then applies `mine` color
      * and sets the position `p`. `baseSym` / `sym` pick the correct glyph for color.
      */
-    void set(std::shared_ptr<Board> board,
-             std::pair<size_t, size_t> ps,
+    void set(Pos ps,
              bool mine, const Piece &tpl);
 
     /**
@@ -93,7 +91,7 @@ struct Piece
      * @brief Set position of the piece.
      * @param r, c -> row, and col.
      */
-    void setPos(std::pair<size_t, size_t> ps);
+    void setPos(Pos ps);
 };
 
 /* Canonical templates declared here; definitions live in src/piece.cpp.

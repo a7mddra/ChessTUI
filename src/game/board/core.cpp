@@ -5,38 +5,34 @@
 #include "utils/tui/tui.hpp"
 
 Board::Board()
-    : promoting(false),
-      processing(false) {}
+    : processing(false),
+      promoting(false) {}
 
 void Board::init()
 {
     promos = {{'q', Queen}, {'r', Rook}, {'b', Bishop}, {'n', Knight}};
-    
-    auto self = shared_from_this();
+
     {
         Piece* white_back[] = {
             &R1, &N1, &B1, &QQ, &KK, &B2, &N2, &R2 };
         const Piece white_back_tpls[] = {
             Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook };
         for (size_t i = 0; i < consts::COLS; ++i)
-            white_back[i]->set(
-                self, {consts::ROWS - 1, i}, true, white_back_tpls[i]);
+            white_back[i]->set({consts::ROWS - 1, i}, true, white_back_tpls[i]);
     }
 
     {
         Piece* white_pawns[] = { 
             &P1, &P2, &P3, &P4, &P5, &P6, &P7, &P8 };
         for (size_t i = 0; i < consts::COLS; ++i)
-            white_pawns[i]->set(
-                self, {consts::ROWS - 2, i}, true, Pawn);
+            white_pawns[i]->set({consts::ROWS - 2, i}, true, Pawn);
     }
     
     {
         Piece* black_pawns[] = { 
             &p1, &p2, &p3, &p4, &p5, &p6, &p7, &p8 };
         for (size_t i = 0; i < consts::COLS; ++i)
-            black_pawns[i]->set(
-                self, {consts::PR_ROW + 1, i}, false, Pawn);
+            black_pawns[i]->set({consts::PR_ROW + 1, i}, false, Pawn);
     }
 
     {
@@ -45,11 +41,10 @@ void Board::init()
         const Piece black_back_tpls[] = {
             Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook };
         for (size_t i = 0; i < consts::COLS; ++i)
-            black_back[i]->set(
-                self, {consts::PR_ROW, i}, false, black_back_tpls[i]);
+            black_back[i]->set({consts::PR_ROW, i}, false, black_back_tpls[i]);
     }
-    
-    sq.set(self, {-1, -1}, false, Square);
+
+    sq.set({-1, -1}, false, Square);
 
     gBoard = std::vector<std::vector<Piece>>(
         consts::ROWS, std::vector<Piece>(consts::COLS, sq));
@@ -63,6 +58,27 @@ void Board::init()
         {p5.pos, &p5}, {p6.pos, &p6}, {p7.pos, &p7}, {p8.pos, &p8},
         {r1.pos, &r1}, {n1.pos, &n1}, {b1.pos, &b1}, {qq.pos, &qq},
         {kk.pos, &kk}, {b2.pos, &b2}, {n2.pos, &n2}, {r2.pos, &r2}
+    };
+
+    //debug
+    myScore = 16;
+    aiScore = 9;
+    myLost = {
+        P1.baseSym,
+        P2.baseSym,
+        P3.baseSym,
+        N1.baseSym,
+        QQ.baseSym,
+    };
+    aiLost = {
+        p1.baseSym,
+        p2.baseSym,
+        p3.baseSym,
+        p4.baseSym,
+        p5.baseSym,
+        n1.baseSym,
+        b1.baseSym,
+        qq.baseSym,
     };
 
     reState();

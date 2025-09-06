@@ -18,7 +18,7 @@ bool Board::tryMove()
     }
     else if (state == gst::PENDING)
     {
-        valid = (input.length() == consts::FL_LEN);
+        valid = (input.length() == consts::PN_LEN);
     }
     else
     {
@@ -74,6 +74,7 @@ bool Board::tryMove()
                 }
                 break;
             }
+            [[fallthrough]];
 
         default:
         def:
@@ -140,7 +141,7 @@ void Board::processMove()
         auto self = shared_from_this();
         int low = std::tolower(input[0]);
         char ch = static_cast<char>(low);
-        pMap[to]->set(self, to, true, promos[ch]);
+        pMap[to]->set(to, true, promos[ch]);
         promoting = false;
         syncPos();
         reState();
@@ -190,6 +191,7 @@ void Board::applyMove(Pos t)
         {
             makeMove({xt, rf}, {xt, rt});
         }
+        [[fallthrough]];
     }
     default:
     {

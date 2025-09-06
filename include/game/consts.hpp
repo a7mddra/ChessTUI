@@ -13,13 +13,14 @@ namespace consts
 
     /* ------ Special ------*/
     constexpr int CTL_ROW = 7;
-    constexpr int KSC_COL = 6;
-    constexpr int QSC_COL = 2;
-
-    constexpr int RKC_FR  = 7;
+    
     constexpr int RKC_TO  = 5;
-
+    constexpr int KSC_COL = 6;
+    constexpr int RKC_FR  = 7;
+    
     constexpr int RQC_FR  = 0;
+    constexpr int EQC_COL = 1;
+    constexpr int QSC_COL = 2;
     constexpr int RQC_TO  = 3;
 
     /* --- Algebraic bounds ----*/

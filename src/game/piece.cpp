@@ -14,12 +14,9 @@ static std::string symbol_for(Identity id, bool mine)
     }
 }
 
-/* ------------ Implementation: Piece methods ------------------ */
+/* -------- Implementation: Piece methods ---------- */
 
-void Piece::set(
-    std::shared_ptr<Board> board,
-    std::pair<size_t, size_t> ps,
-    bool mine, const Piece &tpl)
+void Piece::set(Pos ps, bool mine, const Piece &tpl)
 {
     baseSym   = symbol_for(tpl.identity, mine);
     isSliding = tpl.isSliding;

@@ -114,8 +114,9 @@ namespace tasks
                     }
                 }
 
+                Pos to = {xt, yt};
                 board->from = {xf, yf};
-                board->applyMove({xt, yt});
+                board->applyMove(to);
 
                 if (board->totEmpty < tmp)
                 {
@@ -125,8 +126,8 @@ namespace tasks
 
                 if (prom != '-')
                 {
-                    board->pMap[{xt, yt}]->set(
-                        board, {xt, yt}, false, board->promos[prom]);
+                    auto pc = board->promos[prom];
+                    board->pMap[to]->set(to, false, pc);
                     board->syncPos();
                 }
 

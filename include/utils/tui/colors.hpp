@@ -19,6 +19,11 @@ namespace color
         return "\033[38;2;13;146;244m" + s + "\033[0m";
     }
 
+    inline std::string lgreen(const std::string &s)
+    {
+        return "\033[38;2;144;238;144m" + s + "\033[0m";
+    }
+
     inline std::string orange(const std::string &s)
     {
         return "\033[38;2;255;102;0m" + s + "\033[0m";
@@ -33,4 +38,10 @@ namespace color
     {
         return "\033[38;2;128;0;128m" + s + "\033[0m";
     }
+
+    inline std::string gray(const std::string &s)
+    {
+        return "\033[37m" + s + "\033[0m";
+    }
+
 }
