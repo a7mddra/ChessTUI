@@ -61,14 +61,19 @@ public:
     bool promoting;
 
     Pos from, to, enpAI;
+    Piece* cell(Pos p) const;
     std::unordered_map<char, Piece> promos;
     std::vector<std::vector<Piece>> gBoard;
     std::unordered_map<Pos, Piece *, PosHash> pMap;
 
-    const bool isEmpty(Pos p) const;
-    const bool inRange(Pos p) const;
+    bool isEmpty(Pos p) const;
+    bool isEnemy(Pos p) const;
+    bool inRange(Pos p) const;
 
-    bool isSafe(const Piece &p);
+    template <typename F>
+    void forEachCell(F f);
+
+    bool isSafe(const Piece &pc);
     Piece p1, p2, p3, p4, p5, p6, p7, p8,
         P1, P2, P3, P4, P5, P6, P7, P8,
         r1, r2, R1, R2,

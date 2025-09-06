@@ -99,8 +99,8 @@ bool Board::tryMove()
 
         size_t x = static_cast<size_t>(consts::RANK_MAX - rank);
         size_t y = static_cast<size_t>(file - consts::FILE_MIN);
-
-        if (isEmpty({x, y}))
+        
+        if (!inRange({x, y}))
         {
             setState(gst::ERRINPUT);
             return false;
@@ -108,7 +108,7 @@ bool Board::tryMove()
 
         if (i == 0)
         {
-            if (pMap[{x, y}]->isMe)
+            if (cell({x, y}) && cell({x, y})->isMe)
             {
                 setState(gst::PENDING);
                 from = {x, y};
@@ -142,31 +142,34 @@ void Board::processMove()
         char ch = static_cast<char>(low);
         pMap[to]->set(self, to, true, promos[ch]);
         promoting = false;
+        syncPos();
         reState();
         return;
-    }
-    if (pMap[from]->identity == PAWN && to.first == consts::PR_ROW)
-    {
-        setState(gst::PROMOTION);
-        promoting = true;
     }
     applyMove(to);
 }
 
 void Board::applyMove(Pos t)
 {
-    size_t xf = from.first;
-    size_t yf = from.second;
+    auto   f  = from;
+    size_t xf = f.first;
+    size_t yf = f.second;
     size_t xt = t.first;
     size_t yt = t.second;
 
-    switch (pMap[from]->identity)
+    switch (pMap[f]->identity)
     {
     case PAWN:
     {
         if (yt != yf && isEmpty(t))
         {
             pMap.erase({xf, yt});
+            syncPos();
+        }
+        if (xt == consts::PR_ROW)
+        {
+            setState(gst::PROMOTION);
+            promoting = true;
         }
         goto def;
     }
@@ -191,7 +194,7 @@ void Board::applyMove(Pos t)
     default:
     {
     def:
-        makeMove({xf, yf}, {xt, yt});
+        makeMove(f, t);
         break;
     }
     }
@@ -199,16 +202,14 @@ void Board::applyMove(Pos t)
 
 void Board::makeMove(Pos f, Pos t)
 {
-    auto xf = f.first, yf = f.second;
-    auto xt = t.first, yt = t.second;
-    auto pc = pMap.at({xf, yf});
+    auto pc = cell(f);
 
-    pMap.erase({xf, yf});
-    pMap.erase({xt, yt});
+    pMap.erase(f);
+    pMap.erase(t);
 
-    pc->setPos({xt, yt});
+    pc->setPos(t);
     pc->isMoved = true;
-    pMap[{xt, yt}] = pc;
+    pMap[t] = pc;
 
     syncPos();
 }

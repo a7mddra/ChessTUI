@@ -127,6 +127,7 @@ namespace tasks
                 {
                     board->pMap[{xt, yt}]->set(
                         board, {xt, yt}, false, board->promos[prom]);
+                    board->syncPos();
                 }
 
                 board->from   = {-1, -1};

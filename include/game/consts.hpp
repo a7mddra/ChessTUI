@@ -31,7 +31,7 @@ namespace consts
     /* ------- misc -------*/
     constexpr int FPS = 50;
     constexpr int SPN = 80;
-    constexpr int SPL = 3000;
+    constexpr int SPL = 500;
 
     /* ------ Input lens -------*/
     constexpr size_t FL_LEN   = 4;

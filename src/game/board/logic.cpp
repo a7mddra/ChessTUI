@@ -1,12 +1,7 @@
 #include "game/board.hpp"
 #include "game/consts.hpp"
 
-const bool Board::isEmpty(Pos p) const
-{
-    return pMap.find(p) == pMap.end();
-}
-
-const bool Board::inRange(Pos p) const
+bool Board::inRange(Pos p) const
 {
     auto r = static_cast<int>(p.first);
     auto c = static_cast<int>(p.second);
@@ -15,69 +10,96 @@ const bool Board::inRange(Pos p) const
     return row && col;
 }
 
-void Board::syncPos()
+Piece *Board::cell(Pos p) const
+{
+    auto it = pMap.find(p);
+    return it != pMap.end() ? it->second : nullptr;
+}
+
+bool Board::isEmpty(Pos p) const
+{
+    return cell(p) == nullptr;
+}
+
+bool Board::isEnemy(Pos p) const
+{
+    return cell(p) && !cell(p)->isMe;
+}
+
+template <typename F>
+void Board::forEachCell(F f)
 {
     for (int r = 0; r < consts::ROWS; ++r)
     {
         for (int c = 0; c < consts::COLS; ++c)
         {
-            auto it = pMap.find({r, c});
-            if (it != pMap.end())
-            {
-                gBoard[r][c] = *(it->second);
-            }
-            else
-            {
-                gBoard[r][c] = sq;
-            }
+            f({r, c});
         }
     }
+}
+
+void Board::syncPos()
+{
+    forEachCell([this](Pos p)
+    {
+        auto [r, c] = p;
+        gBoard[r][c] = cell(p) ? *cell(p) : sq;
+    });
 }
 
 void Board::syncEval()
 {
-    for (int r = 0; r < consts::ROWS; ++r)
+    forEachCell([this](Pos p)
     {
-        for (int c = 0; c < consts::COLS; ++c)
-        {
-            gBoard[r][c].setEval(eval[r][c]);
-        }
-    }
+        auto [r, c] = p;
+        gBoard[r][c].setEval(eval[r][c]);
+    });
 }
 
 void Board::setEval(Pos t, int v)
 {
-    auto pc = pMap[from];
-    auto cap = pMap.count(t) ? pMap[t] : nullptr;
-
-    makeMove(from, t);
-
+    auto f   = from;
+    auto pc  = cell(f);
+    auto cap = cell(t);
+    
+    // simulate
+    pMap.erase(f);
+    pMap.erase(t);
+    pc->setPos(t);
+    pMap[t] = pc;
+    
+    // evaluate
     if (isSafe(KK))
     {
-        eval[t.first][t.second] = v;
+        auto[r, c] = t;
+        eval[r][c] = v;
     }
 
-    makeMove(t, from);
+    // undo
+    pMap.erase(t);
+    pc->setPos(f);
+    pMap[f] = pc;
     if (cap)
     {
         pMap[t] = cap;
     }
 }
 
-bool Board::isSafe(const Piece &p)
+bool Board::isSafe(const Piece &pc)
 {
-    int r = static_cast<int>(p.pos.first);
-    int c = static_cast<int>(p.pos.second);
+    int r = static_cast<int>(pc.pos.first);
+    int c = static_cast<int>(pc.pos.second);
     for (auto [dr, dc] : Knight.deltas)
     {
         int nr = r + dr;
         int nc = c + dc;
-        if (!inRange({nr, nc}))
+        Pos ps = {nr, nc};
+
+        if (!inRange(ps))
         {
             continue;
         }
-        if (!pMap[{nr, nc}]->isMe &&
-            pMap[{nr, nc}]->identity == KNIGHT)
+        if (isEnemy(ps) && cell(ps)->identity == KNIGHT)
         {
             return false;
         }
@@ -90,48 +112,43 @@ bool Board::isSafe(const Piece &p)
         {
             int nr = r + dr * inc;
             int nc = c + dc * inc;
+            Pos ps = {nr, nc};
 
-            if (!inRange({nr, nc}))
+            if (!inRange(ps))
             {
                 break;
             }
-
-            if (pMap[{nr, nc}]->isMe or isEmpty({nr, nc}))
-            {
-                break;
-            }
-
-            if (!pMap[{nr, nc}]->isMe)
+            if (isEnemy(ps))
             {
                 bool isDiag = (dr != 0 && dc != 0);
 
-                if (pMap[{nr, nc}]->identity == QUEEN)
+                if (cell(ps)->identity == QUEEN)
                 {
                     return false;
                 }
 
-                if (inc == 1 && pMap[{nr, nc}]->identity == KING)
+                if (inc == 1 && cell(ps)->identity == KING)
                 {
                     return false;
                 }
 
                 if (isDiag)
                 {
-                    if (inc == 1 && pMap[{nr, nc}]->identity == PAWN)
+                    if (inc == 1 && cell(ps)->identity == PAWN)
                     {
                         if (dr == -1)
                         {
                             return false;
                         }
                     }
-                    if (pMap[{nr, nc}]->identity == BISHOP)
+                    if (cell(ps)->identity == BISHOP)
                     {
                         return false;
                     }
                 }
                 else
                 {
-                    if (pMap[{nr, nc}]->identity == ROOK)
+                    if (cell(ps)->identity == ROOK)
                     {
                         return false;
                     }
@@ -149,7 +166,7 @@ void Board::markValid()
 {
     int r = static_cast<int>(from.first);
     int c = static_cast<int>(from.second);
-    auto id = pMap[from]->identity;
+    auto id = cell(from)->identity;
 
     switch (id)
     {
@@ -162,8 +179,7 @@ void Board::markValid()
             {
                 setEval({st1, c}, 1);
                 int st2 = st1 - 1;
-                if (!pMap[from]->isMoved &&
-                    isEmpty({st2, c}))
+                if (!cell(from)->isMoved && isEmpty({st2, c}))
                 {
                     setEval({st2, c}, 1);
                 }
@@ -174,18 +190,19 @@ void Board::markValid()
 
     case KING:
     {
-        if (isSafe(*pMap[from]))
+        if (isSafe(KK))
         {
-            Pos k, ksc, rkc, qsc, rqc;
-            ksc = {consts::CTL_ROW, consts::KSC_COL};
-            rkc = {consts::CTL_ROW, consts::RKC_TO};
-            qsc = {consts::CTL_ROW, consts::QSC_COL};
-            rqc = {consts::CTL_ROW, consts::RQC_TO};
+            Pos ksc = {consts::CTL_ROW, consts::KSC_COL};
+            Pos rkc = {consts::CTL_ROW, consts::RKC_TO};
+            Pos qsc = {consts::CTL_ROW, consts::QSC_COL};
+            Pos rqc = {consts::CTL_ROW, consts::RQC_TO};
+
             auto chk = [&](Pos pos) -> bool
             {
-                Piece p;
-                p.setPos(pos);
-                return isEmpty(pos) && isSafe(p);
+                auto [r, c] = pos;
+                syncPos();
+                Piece pc = gBoard[r][c];
+                return isEmpty(pos) && isSafe(pc);
             };
             if (chk(ksc) and chk(rkc))
             {
@@ -201,49 +218,48 @@ void Board::markValid()
     default:
     def:
     {
-        for (auto [dr, dc] : pMap[from]->deltas)
+        for (auto [dr, dc] : cell(from)->deltas)
         {
             int nr = r + dr;
             int nc = c + dc;
-            if (inRange({nr, nc}))
+            Pos ps = {nr, nc};
+            if (inRange(ps))
             {
-                if (!pMap[{nr, nc}]->isMe && !isEmpty({nr, nc}))
+                if (isEnemy(ps))
                 {
-                    setEval({nr, nc}, -1);
+                    setEval(ps, -1);
                 }
                 if (id == PAWN)
                 {
-                    if (enpAI.first == nr &&
-                        enpAI.second == nc)
+                    if (enpAI == ps)
                     {
-                        setEval({nr, nc}, 1);
+                        setEval(ps, 1);
                         setEval({r, nc}, -1);
                     }
                     continue;
                 }
-                if (isEmpty({nr, nc}))
+                if (isEmpty(ps))
                 {
-                    setEval({nr, nc}, 1);
+                    setEval(ps, 1);
                 }
-                if (pMap[from]->isSliding)
+                if (cell(from)->isSliding)
                 {
-                    int sr = nr + dr;
-                    int sc = nc + dc;
-                    while (inRange({sr, sc}))
+                    ps = {nr + dr, nc + dc};
+                    while (inRange(ps))
                     {
-                        if (isEmpty({sr, sc}))
+                        if (isEmpty(ps))
                         {
-                            setEval({sr, sc}, 1);
+                            setEval(ps, 1);
                         }
                         else
                         {
-                            if (!pMap[{nr, nc}]->isMe)
+                            if (isEnemy(ps))
                             {
-                                setEval({sr, sc}, -1);
+                                setEval(ps, -1);
                             }
                         }
-                        sr += dr;
-                        sc += dc;
+                        ps.first  += dr;
+                        ps.second += dc;
                     }
                 }
             }
@@ -256,7 +272,8 @@ void Board::markValid()
 
 void Board::umarkValid()
 {
-    eval.assign(consts::ROWS,
-                std::vector<int>(consts::COLS, 0));
+    using vec = std::vector<int>;
+    vec ZEROS = vec(consts::COLS, 0);
+    eval.assign(consts::ROWS, ZEROS);
     syncEval();
 }
