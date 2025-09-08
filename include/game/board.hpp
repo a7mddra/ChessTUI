@@ -1,13 +1,17 @@
 #pragma once
 
+#include <array>    
 #include <memory>
 #include <atomic>
 #include <vector>
 #include <string>
 #include <thread>
 #include <chrono>
+#include <cstdio>   
+#include <sstream>
 #include <utility>
 #include <iomanip>
+#include <stdexcept>
 #include <algorithm>
 #include <unordered_map>
 
@@ -41,7 +45,6 @@ public:
     void setEval(Pos t, int v);
     std::vector<std::vector<int>> eval;
 
-    void swapKQ();
     void kill(Pos p);
     void applyMove(Pos t);
     void makeMove(Pos f, Pos t);

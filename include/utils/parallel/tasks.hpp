@@ -4,6 +4,7 @@
 
 #include "game/board.hpp"
 #include "game/consts.hpp"
+#include "engine/engine.hpp"
 
 namespace tasks
 {
@@ -40,49 +41,16 @@ namespace tasks
         {
             try
             {
-                // std::string fen = board->genFEN();
-                std::string resp;
-
-                /*
-                 * Run wrapper.py with arg fen and lestin to resp.
-                 *
-                 *------------------ Simulate AI thinking ----------------*/
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                {
-                    std::ifstream fin("debug.txt");
-                    if (fin)
-                    {
-                        std::getline(fin, resp);
-                        auto ltrim = [](std::string &s)
-                        {
-                            size_t p = 0;
-                            while (p < s.size() && std::isspace(
-                                static_cast<unsigned char>(s[p])))
-                                ++p;
-                            if (p)
-                                s.erase(0, p);
-                        };
-                        auto rtrim = [](std::string &s)
-                        {
-                            while (!s.empty() && std::isspace(
-                                static_cast<unsigned char>(s.back())))
-                                s.pop_back();
-                        };
-                        ltrim(resp);
-                        rtrim(resp);
-                    }
-                }
-                /*-------------------------------------------------------*/
-
-                char file = resp[0];
-                char rank = resp[1];
+                auto out  = parseBestMove();
+                char file = out[0];
+                char rank = out[1];
                 size_t xf = static_cast<size_t>(consts::RANK_MAX - rank);
                 size_t yf = static_cast<size_t>(file - consts::FILE_MIN);
-                file      = resp[2];
-                rank      = resp[3];
+                file      = out[2];
+                rank      = out[3];
                 size_t xt = static_cast<size_t>(consts::RANK_MAX - rank);
                 size_t yt = static_cast<size_t>(file - consts::FILE_MIN);
-                char prom = resp.length() > 4 ? resp[4] : '-';
+                char prom = out.length() > 4 ? out[4] : '-';
                 auto &pc  = board->pMap[{xf, yf}];
                 auto id   = pc->identity;
                 auto tmp  = board->cntEmpty();

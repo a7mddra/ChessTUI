@@ -39,4 +39,7 @@ namespace consts
     constexpr size_t PN_LEN   = 2;
     constexpr size_t PR_LEN   = 1;
     constexpr size_t CRSR_LEN = 2;
+
+    /* ------------------------------ Binary path ---------------------------- */
+    const std::string BI_PATH = "src/engine/binary/stockfish-ubuntu-x86-64-avx2";
 }
