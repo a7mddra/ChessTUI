@@ -36,7 +36,13 @@ namespace tasks
         board->setState(gst::THINKING);
         board->printContent();
         board->myTurn = false;
-        return [board]()
+        auto rev = [&](char r, char f) -> Pos
+        {
+            int irk = board->isWhite ? consts::RANK_MAX - r : r - consts::RANK_MIN;
+            int ifl = board->isWhite ? f - consts::FILE_MIN : consts::FILE_MAX - f;
+            return {irk, ifl};
+        };
+        return [board, rev]()
         {
             try
             {
@@ -44,12 +50,12 @@ namespace tasks
                 auto out  = parseBestMove(fen);
                 char file = out[0];
                 char rank = out[1];
-                size_t xf = static_cast<size_t>(consts::RANK_MAX - rank);
-                size_t yf = static_cast<size_t>(file - consts::FILE_MIN);
+                size_t xf = static_cast<size_t>(rev(rank, file).first);
+                size_t yf = static_cast<size_t>(rev(rank, file).second);
                 file      = out[2];
                 rank      = out[3];
-                size_t xt = static_cast<size_t>(consts::RANK_MAX - rank);
-                size_t yt = static_cast<size_t>(file - consts::FILE_MIN);
+                size_t xt = static_cast<size_t>(rev(rank, file).first);
+                size_t yt = static_cast<size_t>(rev(rank, file).second);
                 char prom = out.length() > 4 ? out[4] : '-';
                 auto &pc  = board->pMap[{xf, yf}];
                 auto id   = pc->identity;

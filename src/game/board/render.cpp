@@ -56,7 +56,8 @@ void Board::printBoard()
         }
 
         std::string row;
-        row += std::to_string(consts::ROWS - r) + " ";
+        int rank = isWhite? consts::ROWS - r : r + 1;
+        row += std::to_string(rank) + " ";
         for (auto &t : tokens)
         {
             row += t;
@@ -74,7 +75,9 @@ void Board::printBoard()
     tplRow = "  ";
     for (int c = 0; c < consts::COLS; ++c)
     {
-        char file = (consts::FILE_MIN + c);
+        char filw = consts::FILE_MIN + c;
+        char filb = consts::FILE_MAX - c;
+        char file = isWhite ? filw : filb;
         tplRow += static_cast<char>(std::toupper(
             static_cast<unsigned char>(file)));
         tplRow += ' ';

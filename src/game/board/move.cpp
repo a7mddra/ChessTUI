@@ -73,14 +73,8 @@ bool Board::tryMove()
         case KING:
             if (abs(y - c) == 2)
             {
-                if (y > c)
-                {
-                    KK.OO = true;
-                }
-                else
-                {
-                    KK.OOO = true;
-                }
+                KK.OO = (isWhite == (y > c));
+                KK.OOO = !KK.OO;
                 break;
             }
             [[fallthrough]];
@@ -107,8 +101,10 @@ bool Board::tryMove()
         char file = static_cast<char>(low);
         char rank = input[i + 1];
 
-        size_t x = static_cast<size_t>(consts::RANK_MAX - rank);
-        size_t y = static_cast<size_t>(file - consts::FILE_MIN);
+        int irank = isWhite ? consts::RANK_MAX - rank : rank - consts::RANK_MIN;
+        int ifile = isWhite ? file - consts::FILE_MIN : consts::FILE_MAX - file;
+        size_t x = static_cast<size_t>(irank);
+        size_t y = static_cast<size_t>(ifile);
         
         if (!inRange({x, y}))
         {

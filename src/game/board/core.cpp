@@ -83,7 +83,7 @@ void Board::init()
     flmvCNT  = 1;
     totEmpty = cntEmpty();
 
-    if (!myTurn)
+    if (!isWhite)
     {
         auto self = shared_from_this();
         parallel::runParallel(
