@@ -19,21 +19,21 @@ void Board::init()
         const Piece white_back_tpls[] = {
             Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook };
         for (size_t i = 0; i < consts::COLS; ++i)
-            white_back[i]->set({consts::ROWS - 1, i}, true, white_back_tpls[i]);
+            white_back[i]->set({consts::ROWS - 1, i}, true, isWhite, white_back_tpls[i]);
     }
 
     {
         Piece* white_pawns[] = { 
             &P1, &P2, &P3, &P4, &P5, &P6, &P7, &P8 };
         for (size_t i = 0; i < consts::COLS; ++i)
-            white_pawns[i]->set({consts::ROWS - 2, i}, true, Pawn);
+            white_pawns[i]->set({consts::ROWS - 2, i}, true, isWhite, Pawn);
     }
     
     {
         Piece* black_pawns[] = { 
             &p1, &p2, &p3, &p4, &p5, &p6, &p7, &p8 };
         for (size_t i = 0; i < consts::COLS; ++i)
-            black_pawns[i]->set({consts::PR_ROW + 1, i}, false, Pawn);
+            black_pawns[i]->set({consts::PR_ROW + 1, i}, false, !isWhite, Pawn);
     }
 
     {
@@ -42,13 +42,23 @@ void Board::init()
         const Piece black_back_tpls[] = {
             Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook };
         for (size_t i = 0; i < consts::COLS; ++i)
-            black_back[i]->set({consts::PR_ROW, i}, false, black_back_tpls[i]);
+            black_back[i]->set({consts::PR_ROW, i}, false, !isWhite, black_back_tpls[i]);
     }
 
-    sq.set({-1, -1}, false, Square);
+    sq.set({-1, -1}, false, false, Square);
 
     gBoard = std::vector<std::vector<Piece>>(
         consts::ROWS, std::vector<Piece>(consts::COLS, sq));
+
+    if (!isWhite)
+    {
+        auto tmp = KK.pos;
+        KK.setPos(QQ.pos);
+        QQ.setPos(tmp);
+        tmp = kk.pos;
+        kk.setPos(qq.pos);
+        qq.setPos(tmp);
+    }
 
     pMap = {
         {P1.pos, &P1}, {P2.pos, &P2}, {P3.pos, &P3}, {P4.pos, &P4},
@@ -61,46 +71,105 @@ void Board::init()
         {kk.pos, &kk}, {b2.pos, &b2}, {n2.pos, &n2}, {r2.pos, &r2}
     };
 
-    //debug
-    myScore = 16;
-    aiScore = 9;
-    myLost = {
-        P1.baseSym,
-        P2.baseSym,
-        P3.baseSym,
-        N1.baseSym,
-        QQ.baseSym,
-    };
-    aiLost = {
-        p1.baseSym,
-        p2.baseSym,
-        p3.baseSym,
-        p4.baseSym,
-        p5.baseSym,
-        n1.baseSym,
-        b1.baseSym,
-        qq.baseSym,
-    };
-
     reState();
     syncPos();
     enpAI    = {-1, -1};
     enpME    = "-";
+    myScore  = 0;
+    aiScore  = 0;
     hfmvCLK  = 0;
     flmvCNT  = 1;
     totEmpty = cntEmpty();
+    myLost.clear();
+    aiLost.clear();
 
-    // if (!myTurn)
-    // {
-    //     parallel::runParallel(
-    //         tasks::makeSpinner(self),
-    //         tasks::makeAI(self));
-    // }
+    if (!myTurn)
+    {
+        auto self = shared_from_this();
+        parallel::runParallel(
+            tasks::makeSpinner(self),
+            tasks::makeAI(self));
+    }
 }
 
-int Board::cntEmpty()
+std::string Board::genFEN()
 {
-    return consts::SIZE - static_cast<int>(pMap.size());
+    syncPos();
+    Vec ranks;
+    std::string fen; 
+    std::string cas;
+    for (size_t r = 0; r < consts::ROWS; ++r)
+    {
+        std::string curr;
+        int isSq = 0;
+        for (auto &pc : gBoard[r])
+        {
+            if (pc.identity == SQUARE)
+            {
+                ++isSq;
+            }
+            else
+            {
+                if (isSq > 0)
+                {
+                    curr += std::to_string(isSq);
+                    isSq = 0;
+                }
+                curr += pc.ch;
+            }
+        }
+        if (isSq > 0)
+        {
+            curr += std::to_string(isSq);
+        }
+        if (!isWhite)   
+        {
+            std::reverse(curr.begin(), curr.end());
+        }
+        ranks.push_back(curr);
+    }
+
+    if (!isWhite) 
+    {
+        std::reverse(ranks.begin(), ranks.end());
+    }
+    
+    for (size_t i = 0; i < consts::ROWS; ++i)
+    {
+        fen += ranks[i];
+        if (i < consts::ROWS - 1)
+        {
+            fen += '/';
+        }
+    }
+    
+    if (isWhite)
+    {
+        fen += " b";
+        if (!KK.isMoved && !R2.isMoved) cas += 'K';
+        if (!KK.isMoved && !R1.isMoved) cas += 'Q';
+        if (!kk.isMoved && !r2.isMoved) cas += 'k';
+        if (!kk.isMoved && !r1.isMoved) cas += 'q';
+    }
+    else 
+    {
+        fen += " w";
+        if (!kk.isMoved && !r2.isMoved) cas += 'K';
+        if (!kk.isMoved && !r1.isMoved) cas += 'Q';
+        if (!KK.isMoved && !R2.isMoved) cas += 'k';
+        if (!KK.isMoved && !R1.isMoved) cas += 'q';
+    }
+    
+    if (!cas.size())
+    {
+        cas = " -";
+    }
+
+    fen += ' ' + cas + ' ' + enpME;
+    fen += ' ' + std::to_string(hfmvCLK);
+    fen += ' ' + std::to_string(flmvCNT);
+
+    return fen;
 }
 
 void Board::readLine()
@@ -141,8 +210,9 @@ void Board::processInput()
 
     if (input == "flip")
     {
-        // myTurn = !myTurn;
-        // init(); 
+        isWhite = !isWhite;
+        myTurn = isWhite == true;
+        init(); 
         return;
     }
 
@@ -155,7 +225,7 @@ void Board::processInput()
     /*-------- debug --------*/
     if (input == "fen")
     {
-        // log.assign({genFEN()});
+        log.assign({genFEN()});
         return;
     }
     /*-----------------------*/
@@ -168,6 +238,7 @@ void Board::processInput()
     if (state != gst::PENDING)
     {
         processMove();
+        calcScore();
         if (state != gst::PROMOTION)
         {    
             auto self = shared_from_this();

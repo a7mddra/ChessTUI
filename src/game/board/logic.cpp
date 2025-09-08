@@ -16,9 +16,31 @@ Piece *Board::cell(Pos p) const
     return it != pMap.end() ? it->second : nullptr;
 }
 
+void Board::kill(Pos p)
+{
+    Vec &src = myTurn ? myLost : aiLost;
+    if (cell(p))
+    {
+        auto sym = cell(p)->baseSym;
+        src.emplace_back(sym);
+    }
+}
+
 bool Board::isEmpty(Pos p) const
 {
     return cell(p) == nullptr;
+}
+
+int Board::cntEmpty()
+{
+    size_t sz = pMap.size();
+    int pcs = static_cast<int>(sz);
+    return consts::SIZE - pcs;
+}
+
+int Board::revPos(int src)
+{
+    return consts::ROWS - src - 1;
 }
 
 template <typename F>
@@ -202,7 +224,16 @@ void Board::markValid()
             Pos rqc = {consts::CTL_ROW, consts::RQC_TO};
             Pos eqc = {consts::CTL_ROW, consts::EQC_COL};
 
-            auto chk = [&](Pos pos) -> bool
+            if (!isWhite)
+            {
+                ksc.second = revPos(ksc.second);
+                rkc.second = revPos(rkc.second);
+                qsc.second = revPos(qsc.second);
+                rqc.second = revPos(rqc.second);
+                eqc.second = revPos(eqc.second);
+            }
+
+            auto chk = [&](Pos pos)-> bool
             {
                 Piece p;
                 p.setPos(pos);
@@ -224,7 +255,7 @@ void Board::markValid()
     default:
     def:
     {
-        auto evalu = [&](Pos ps) -> void
+        auto evalu = [&](Pos ps)-> void
         {
             if (isEmpty(ps))
             {
@@ -258,9 +289,13 @@ void Board::markValid()
                 if (cell(from)->isSliding)
                 {
                     Pos pi = ps;
-                    while (inRange(pi) && isEmpty(pi))
+                    while (inRange(pi))
                     {
                         evalu(pi);
+                        if (!isEmpty(pi))
+                        {
+                            break;
+                        }
                         pi.first += dr;
                         pi.second += dc;
                     }
@@ -282,4 +317,20 @@ void Board::umarkValid()
     vec ZEROS = vec(consts::COLS, 0);
     eval.assign(consts::ROWS, ZEROS);
     syncEval();
+}
+
+void Board::calcScore()
+{
+    int myS=0, aiS=0, val;
+    auto sum = [&](int &src)-> void
+    {
+        src += val;
+    };
+    for (auto [_, pc] : pMap)
+    {
+        val = pc->score;
+        pc->isMe ? sum(myS) : sum(aiS);
+    }
+    aiScore = std::max(0, aiS - myS);
+    myScore = std::max(0, myS - aiS);
 }

@@ -14,6 +14,7 @@
 #include "piece.hpp"
 
 using Pos = std::pair<size_t, size_t>;
+using Vec = std::vector<std::string>;
 
 struct PosHash {
     size_t operator()(Pos const& k) const noexcept
@@ -34,29 +35,33 @@ public:
     void run();
     void spinner();
 
+    void calcScore();
     void syncPos();
     void syncEval();
     void setEval(Pos t, int v);
     std::vector<std::vector<int>> eval;
 
+    void swapKQ();
+    void kill(Pos p);
     void applyMove(Pos t);
     void makeMove(Pos f, Pos t);
 
+    Vec log;
     gst state;
     void reState();
     void setState(gst st);
-    std::vector<std::string> log;
 
-    std::vector<std::string> myLost;
-    std::vector<std::string> aiLost;
+    Vec myLost;
+    Vec aiLost;
 
     void printContent();
     void printSplash();
     void printLog();
 
-    // std::string genFEN();
+    std::string genFEN();
     std::string enpME;
     int cntEmpty();
+    int revPos(int src);
     int totEmpty;
     int hfmvCLK;
     int flmvCNT;
@@ -64,13 +69,13 @@ public:
     int aiScore;
 
     std::atomic<bool> processing;
-    bool promoting, isOver;
+    bool promoting, isOver, isWhite, myTurn;
 
     Pos from, to, enpAI;
     Piece* cell(Pos p) const;
     std::unordered_map<char, Piece> promos;
     std::vector<std::vector<Piece>> gBoard;
-    std::unordered_map<Pos, Piece *, PosHash> pMap;
+    std::unordered_map<Pos, Piece*, PosHash> pMap;
 
     bool isEmpty(Pos p) const;
     bool inRange(Pos p) const;

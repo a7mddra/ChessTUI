@@ -56,7 +56,8 @@ struct Piece
     Pos pos = {-1, -1};
 
     /* Stateful chess flags */
-    int eval = 0;                            
+    char ch;
+    int eval = 0;
     bool isMe = false;                       
     bool isMoved = false;                    
     bool OO = false, OOO = false;            
@@ -78,8 +79,7 @@ struct Piece
      * Copies movement metadata and flags from `tpl`, then applies `mine` color
      * and sets the position `p`. `baseSym` / `sym` pick the correct glyph for color.
      */
-    void set(Pos ps,
-             bool mine, const Piece &tpl);
+    void set(Pos ps, bool mine, bool white, const Piece &tpl);
 
     /**
      * @brief Set evaluation marker for display.

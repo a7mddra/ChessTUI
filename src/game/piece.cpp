@@ -1,24 +1,25 @@
 #include "game/piece.hpp" 
 
-static std::string symbol_for(Identity id, bool mine)
+static char char_for(Identity id, bool white)
 {
     switch (id)
     {
-        case PAWN:   return assets::pieces[ mine ? 'P' : 'p' ];
-        case ROOK:   return assets::pieces[ mine ? 'R' : 'r' ];
-        case BISHOP: return assets::pieces[ mine ? 'B' : 'b' ];
-        case KNIGHT: return assets::pieces[ mine ? 'N' : 'n' ];
-        case QUEEN:  return assets::pieces[ mine ? 'Q' : 'q' ];
-        case KING:   return assets::pieces[ mine ? 'K' : 'k' ];
-        default:     return assets::pieces['s'];
+        case PAWN:   return white ? 'P' : 'p';
+        case ROOK:   return white ? 'R' : 'r';
+        case BISHOP: return white ? 'B' : 'b';
+        case KNIGHT: return white ? 'N' : 'n';
+        case QUEEN:  return white ? 'Q' : 'q';
+        case KING:   return white ? 'K' : 'k';
+        default:     return 's';
     }
 }
 
 /* -------- Implementation: Piece methods ---------- */
 
-void Piece::set(Pos ps, bool mine, const Piece &tpl)
+void Piece::set(Pos ps, bool mine, bool white, const Piece &tpl)
 {
-    baseSym   = symbol_for(tpl.identity, mine);
+    ch        = char_for(tpl.identity, white);
+    baseSym   = assets::pieces[ch];
     isSliding = tpl.isSliding;
     identity  = tpl.identity;
     deltas    = tpl.deltas;
@@ -40,8 +41,8 @@ void Piece::setEval(int v)
     }
     else if (eval == -1)
     {
-        sym = color::red(
-            symbol_for(identity, true));
+        char w = static_cast<char>(toupper(ch));
+        sym = color::red(assets::pieces[w]);
     }
     else
     {
@@ -49,7 +50,7 @@ void Piece::setEval(int v)
     }
 }
 
-void Piece::setPos(std::pair<size_t, size_t> ps)
+void Piece::setPos(Pos ps)
 {
     pos = ps;
 }

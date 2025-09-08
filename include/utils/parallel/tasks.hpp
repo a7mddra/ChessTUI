@@ -35,6 +35,7 @@ namespace tasks
     {
         board->setState(gst::THINKING);
         board->printContent();
+        board->myTurn = false;
         return [board]()
         {
             try
@@ -127,14 +128,16 @@ namespace tasks
                 if (prom != '-')
                 {
                     auto pc = board->promos[prom];
-                    board->pMap[to]->set(to, false, pc);
+                    board->pMap[to]->set(to, false, !board->isWhite, pc);
                     board->syncPos();
                 }
 
                 board->from   = {-1, -1};
                 board->kk.OO  = false;
                 board->kk.OOO = false;
+                board->myTurn = true;
                 board->flmvCNT++;
+                board->calcScore();
                 board->reState();
             }
             catch (const std::exception &e)

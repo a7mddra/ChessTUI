@@ -1,7 +1,7 @@
 #include "game/board.hpp"
+#include "game/consts.hpp"
 #include "utils/parallel/parallel.hpp"
 #include "utils/parallel/tasks.hpp"
-#include "game/consts.hpp"
 
 bool Board::tryMove()
 {
@@ -13,7 +13,11 @@ bool Board::tryMove()
             char ch = static_cast<char>(
                 std::tolower(
                     static_cast<unsigned char>(input[0])));
-            valid = promos.count(ch) != 0;
+            valid = promos.count(ch) == 1;
+        }
+        if (valid)
+        {
+            return true;
         }
     }
     else if (state == gst::PENDING)
@@ -46,16 +50,21 @@ bool Board::tryMove()
 
         hfmvCLK++;
         to = p;
+        int dbl = 2;
         int tmp = cntEmpty();
 
         switch (pMap[from]->identity)
         {
         case PAWN:
             hfmvCLK = 0;
-            if (abs(x - r) == 2)
+            if (abs(x - r) == dbl)
             {
-                char file = static_cast<char>(consts::FILE_MIN + c);
-                char rank = static_cast<char>(consts::RANK_MAX - 3);
+                char filw = consts::FILE_MIN + c;
+                char filb = consts::FILE_MAX - c;
+                char rnkw = consts::RANK_MIN + dbl;
+                char rnkb = consts::RANK_MAX - dbl;
+                char file = isWhite ? filw : filb;
+                char rank = isWhite ? rnkw : rnkb;
                 enpME = {file, rank};
                 break;
             }
@@ -141,7 +150,7 @@ void Board::processMove()
         auto self = shared_from_this();
         int low = std::tolower(input[0]);
         char ch = static_cast<char>(low);
-        pMap[to]->set(to, true, promos[ch]);
+        pMap[to]->set(to, true, isWhite, promos[ch]);
         promoting = false;
         syncPos();
         reState();
@@ -152,7 +161,7 @@ void Board::processMove()
 
 void Board::applyMove(Pos t)
 {
-    auto   f  = from;
+    auto f = from;
     size_t xf = f.first;
     size_t yf = f.second;
     size_t xt = t.first;
@@ -164,6 +173,7 @@ void Board::applyMove(Pos t)
     {
         if (yt != yf && isEmpty(t))
         {
+            kill({xf, yt});
             pMap.erase({xf, yt});
             syncPos();
         }
@@ -189,6 +199,11 @@ void Board::applyMove(Pos t)
         }
         if (rf != -1)
         {
+            if (!isWhite)
+            {
+                rf = revPos(rf);
+                rt = revPos(rt);
+            }
             makeMove({xt, rf}, {xt, rt});
         }
         [[fallthrough]];
@@ -205,6 +220,8 @@ void Board::applyMove(Pos t)
 void Board::makeMove(Pos f, Pos t)
 {
     auto pc = cell(f);
+
+    kill(t);
 
     pMap.erase(f);
     pMap.erase(t);
