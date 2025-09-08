@@ -5,7 +5,6 @@ namespace assets
     std::string cursor = "$ ";
 
     std::unordered_map<gst, std::vector<std::string>> logs = {
-        {gst::CHECK,     {"Check!", " "},},
         {gst::LOADING,   {"Loading"},},
         {gst::EXITING,   {"Exiting"},},
         {gst::THINKING,  {"Thinking"},},

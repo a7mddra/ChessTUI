@@ -2,4 +2,4 @@
 
 #include <string>
 
-std::string parseBestMove();
+std::string parseBestMove(const std::string& fen);

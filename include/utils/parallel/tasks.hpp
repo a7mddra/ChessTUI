@@ -27,7 +27,6 @@ namespace tasks
             std::this_thread::sleep_for(
                 std::chrono::milliseconds(consts::SPL));
             board->processing.store(false);
-            board->reState();
         };
     }
 
@@ -41,7 +40,8 @@ namespace tasks
         {
             try
             {
-                auto out  = parseBestMove();
+                auto fen  = board->genFEN();
+                auto out  = parseBestMove(fen);
                 char file = out[0];
                 char rank = out[1];
                 size_t xf = static_cast<size_t>(consts::RANK_MAX - rank);
@@ -58,7 +58,6 @@ namespace tasks
                 board->enpAI  = {-1, -1};
                 board->KK.OO  = false;
                 board->KK.OOO = false;
-
 
                 if (id == PAWN)
                 {

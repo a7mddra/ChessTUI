@@ -7,7 +7,6 @@ enum class gst
     ERRMOVE,
     ERRINPUT,
     DRAW,
-    CHECK,
     CHECKMATE,
     STALEMATE,
     PROMOTION,

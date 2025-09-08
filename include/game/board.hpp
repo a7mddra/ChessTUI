@@ -108,4 +108,7 @@ private:
     void processMove();
     void markValid();
     void umarkValid();
+    
+    bool canMove();
+    bool insufficientMaterial();
 };

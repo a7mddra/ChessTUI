@@ -71,8 +71,10 @@ void Board::init()
         {kk.pos, &kk}, {b2.pos, &b2}, {n2.pos, &n2}, {r2.pos, &r2}
     };
 
-    reState();
     syncPos();
+    myLost.clear();
+    aiLost.clear();
+    
     enpAI    = {-1, -1};
     enpME    = "-";
     myScore  = 0;
@@ -80,8 +82,6 @@ void Board::init()
     hfmvCLK  = 0;
     flmvCNT  = 1;
     totEmpty = cntEmpty();
-    myLost.clear();
-    aiLost.clear();
 
     if (!myTurn)
     {
@@ -176,6 +176,7 @@ void Board::render()
         tasks::showSplash(self),
         tasks::makeSpinner(self));
 
+    setState(gst::INPUT);
     while (state != gst::EXITING)
     {
         printContent();
