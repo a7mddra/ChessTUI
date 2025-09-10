@@ -70,16 +70,12 @@ namespace tasks
                 }
                 else if (id == KING)
                 {
-                    if (yt - yf == 2)
+                    if (abs(yt - yf) == 2)
                     {
-                        board->kk.OO = true;
-                    }
-                    else if (yf - yt == 2)
-                    {
-                        board->kk.OOO = true;
+                        board->kk.OO = board->isWhite == (yt > yf);
+                        board->kk.OOO = !board->kk.OO;
                     }
                 }
-
                 Pos to = {xt, yt};
                 board->from = {xf, yf};
                 board->applyMove(to);
