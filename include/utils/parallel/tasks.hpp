@@ -18,28 +18,20 @@ namespace tasks
         };
     }
 
-    inline std::function<void()> showSplash(
-        std::shared_ptr<Board> board)
-    {
-        board->printSplash();
-        return [board]()
-        {
-            std::this_thread::sleep_for(
-                std::chrono::milliseconds(consts::SPL));
-            board->processing.store(false);
-        };
-    }
-
     inline std::function<void()> makeAI(
         std::shared_ptr<Board> board)
     {
         board->setState(gst::THINKING);
-        board->printContent();
+        board->printBoard();
         board->myTurn = false;
         auto rev = [&](char r, char f) -> Pos
         {
-            int irk = board->isWhite ? consts::RANK_MAX - r : r - consts::RANK_MIN;
-            int ifl = board->isWhite ? f - consts::FILE_MIN : consts::FILE_MAX - f;
+            int irk = board->isWhite 
+                            ? consts::RANK_MAX - r 
+                            : r - consts::RANK_MIN;
+            int ifl = board->isWhite 
+                            ? f - consts::FILE_MIN 
+                            : consts::FILE_MAX - f;
             return {irk, ifl};
         };
         return [board, rev]()
@@ -101,7 +93,8 @@ namespace tasks
                 if (prom != '-')
                 {
                     auto pc = board->promos[prom];
-                    board->pMap[to]->set(to, false, !board->isWhite, pc);
+                    auto &tar = board->pMap[to];
+                    tar->set(to, false, !board->isWhite, pc);
                     board->syncPos();
                 }
 

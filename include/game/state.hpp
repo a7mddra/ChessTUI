@@ -11,7 +11,6 @@ enum class gst
     STALEMATE,
     PROMOTION,
     PENDING,
-    LOADING,
-    EXITING,
-    THINKING
+    THINKING,
+    EXITING
 };

@@ -72,11 +72,10 @@ void Board::init()
     };
 
     syncPos();
-    myLost.clear();
-    aiLost.clear();
     
     enpAI    = {-1, -1};
     enpME    = "-";
+    lastAtt  = " "; 
     myScore  = 0;
     aiScore  = 0;
     hfmvCLK  = 0;
@@ -92,31 +91,20 @@ void Board::init()
     }
 }
 
-void Board::readLine()
-{
-    std::string prompt = assets::cursor;
-    size_t dywid;
-    switch (state)
-    {
-    case gst::PROMOTION:
-        dywid = consts::PR_LEN;
-        break;
-    
-    case gst::PENDING:
-        dywid = consts::PN_LEN;
-        break;
-    
-    default:
-        dywid = consts::FL_LEN;
-        break;
-    }
-    prompt += std::string(dywid, ' ');
-    std::string line = std::string(
-        padd(prompt), ' ');
-    line += color::orange(assets::cursor);
-    std::cout << line;
+void Board::readLine() {
     input.clear();
-    std::getline(std::cin, input);
+    char c;
+    while ((c = console::getch()) != '\n') {
+        if (c == 127) {
+            if (!input.empty()) {
+                input.pop_back();
+                std::cout << "\b \b" << std::flush;
+            }
+        } else {
+            input.push_back(c);
+            std::cout << c << std::flush;
+        }
+    }
     processInput();
 }
 
@@ -142,13 +130,11 @@ void Board::processInput()
         return;
     }
 
-    /*-------- debug --------*/
     if (input == "fen")
     {
         log.assign({genFEN()});
         return;
     }
-    /*-----------------------*/
 
     if (!tryMove() or isOver)
     {
@@ -171,31 +157,21 @@ void Board::processInput()
 
 void Board::render()
 {
-    auto self = shared_from_this();
-    parallel::runParallel(
-        tasks::showSplash(self),
-        tasks::makeSpinner(self));
-
     setState(gst::INPUT);
     while (state != gst::EXITING)
     {
-        printContent();
-        printLog();
+        printBoard();
+        printCursor();
         readLine();
         std::this_thread::sleep_for(
             std::chrono::milliseconds(
                 consts::FPS));
     }
-
-    parallel::runParallel(
-        tasks::showSplash(self),
-        tasks::makeSpinner(self));
 }
 
 void Board::run()
 {
     setlocale(LC_ALL, "");
-    setState(gst::LOADING);
     render();
     exit(0);
 }

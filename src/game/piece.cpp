@@ -1,4 +1,5 @@
 #include "game/piece.hpp" 
+#include "game/board.hpp"
 
 static char char_for(Identity id, bool white)
 {
@@ -32,17 +33,19 @@ void Piece::set(Pos ps, bool mine, bool white, const Piece &tpl)
     eval      = 0;
 }
 
-void Piece::setEval(int v)
+void Piece::setEval(std::shared_ptr<Board> board, Pos p)
 {
-    eval = v;
+    auto [r, c] = p;
+    eval = board->eval[r][c];
     if (eval == 1)
     {
-        sym = assets::pieces['h'];
+        auto tg = ((r + c) & 1) != board->isWhite;
+        auto dot = assets::pieces['h'];
+        sym = tg ? color::gray1(dot) : color::gray2(dot);
     }
     else if (eval == -1)
     {
-        char w = static_cast<char>(toupper(ch));
-        sym = color::red(assets::pieces[w]);
+        sym = color::red(baseSym);
     }
     else
     {

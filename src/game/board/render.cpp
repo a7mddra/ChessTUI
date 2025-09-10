@@ -3,6 +3,9 @@
 #include "game/consts.hpp"
 #include "utils/tui/tui.hpp"
 
+using vec = std::vector<std::string>;
+const int GWD = consts::COLS + 1;
+
 void Board::spinner()
 {
     size_t idx = 0;
@@ -11,11 +14,10 @@ void Board::spinner()
     while (processing.load())
     {
         {
-            std::string tmp = log[0];
-            log[0] += assets::frames[idx];
+            cursor = assets::frames[idx];
+            cursor = color::blue(cursor);
             console::restCursor();
-            printLog();
-            log[0] = tmp;
+            printCursor();
         }
 
         std::this_thread::sleep_for(
@@ -30,20 +32,39 @@ void Board::spinner()
 
 std::string formatScore(int n)
 {
+    if (n == 0)
+    {
+        return "   ";
+    }
+
+    std::ostringstream os;
+
     if (n > 0)
     {
-        std::ostringstream os;
         os << '+' << std::setw(2) << std::setfill('0') << n;
         return color::lgreen(os.str());
     }
-    return std::string(3, ' ');
+    else
+    {
+        os << '-' << std::setw(2) << std::setfill('0') << abs(n);
+        return color::red(os.str());
+    }
 }
 
 void Board::printBoard()
 {
-    using vec = std::vector<std::string>;
     vec pBoard;
-    pBoard.reserve(consts::ROWS + 1);
+    pBoard.resize(consts::ROWS + 1);
+    
+    std::string tplRow;
+    std::string score;
+    
+    score = formatScore(myScore - aiScore);
+    int pad = GWD - utf8Width(score + lastAtt);
+    tplRow += std::string(pad, ' ');
+    tplRow += score;
+    tplRow += lastAtt;
+    pBoard[0] = tplRow;
 
     for (int r = 0; r < consts::ROWS; ++r)
     {
@@ -52,97 +73,49 @@ void Board::printBoard()
 
         for (int c = 0; c < consts::COLS; ++c)
         {
-            tokens.push_back(gBoard[r][c].sym + " ");
+            tokens.push_back(gBoard[r][c].sym);
         }
 
         std::string row;
         int rank = isWhite? consts::ROWS - r : r + 1;
-        row += std::to_string(rank) + " ";
-        for (auto &t : tokens)
+        row += std::to_string(rank);
+        for (int c = 0; c < consts::COLS; ++c)
         {
+            auto &t = tokens[c];
+            auto tg = ((r + c) & 1) != isWhite;
+            t = tg ? color::sq1(t) : color::sq2(t);
             row += t;
         }
-        pBoard.emplace_back(std::move(row));
+        pBoard[r+1] = row;
     }
-
-    std::string tplRow;
-
-    tplRow += formatScore(myScore);
-    tplRow += "  " + pBoard[0] + " ";
-    tplRow += formatScore(aiScore);
-    pBoard[0] = tplRow;
     
-    tplRow = "  ";
+    tplRow = " ";
     for (int c = 0; c < consts::COLS; ++c)
     {
         char filw = consts::FILE_MIN + c;
         char filb = consts::FILE_MAX - c;
         char file = isWhite ? filw : filb;
-        tplRow += static_cast<char>(std::toupper(
-            static_cast<unsigned char>(file)));
-        tplRow += ' ';
+        tplRow += static_cast<char>(file);
     }
     pBoard.emplace_back(tplRow);
 
-    vec myLosses, aiLosses;
-    auto genLosses = [&](const vec &src, vec &out)
-    {
-        out.clear();
-        for (size_t i = 0; i + 1 < src.size(); i += 2)
-        {
-            tplRow = color::lgreen(src[i] + " " + src[i + 1]);
-            out.emplace_back(tplRow);
-        }
-        if (src.size() % 2 == 1)
-        {
-            tplRow = color::lgreen(src.back() + "  ");
-            out.emplace_back(tplRow);
-        }
-        for (size_t i = out.size(); i < consts::ROWS; ++i)
-        {
-            out.emplace_back("   ");
-        }
-    };
-
-    genLosses(myLost, myLosses);
-    genLosses(aiLost, aiLosses);
-
-    for (size_t r = 1; r < pBoard.size(); ++r)
-    {
-        tplRow.clear();
-        tplRow += myLosses.size() >= r ? myLosses[r - 1] : "  ";
-        tplRow += "  " + pBoard[r] + " ";
-        tplRow += aiLosses.size() >= r ? aiLosses[r - 1] : "  ";
-        pBoard[r] = tplRow;
-    }
-
+    console::clearScreen();
     print(pBoard, 'w', true);
-    print({"\n"}, 'w', false);
 }
 
-
-void Board::printHeader()
+void Board::printCursor()
 {
-    print(assets::header, 'g', true);
-    print({"\n"}, 'w', false);
+    auto pad = padd(std::string(GWD, ' '));
+    std::string cur = std::string(pad, ' ');
+    if (!processing.load())
+    {
+        cursor = color::lgreen(">");
+    }
+    cur += cursor;
+    std::cout << cur;
 }
 
-void Board::printLog()
+void Board::detachLog()
 {
-    print(log, 'r', true);
-    print({"\n"}, 'w', false);
-}
 
-void Board::printSplash()
-{
-    console::clearScreen();
-    print(assets::splash, 'r', true);
-    print({"\n"}, 'w', true);
-}
-
-void Board::printContent()
-{
-    console::clearScreen();
-    printHeader();
-    printBoard();
 }

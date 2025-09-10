@@ -18,11 +18,9 @@ Piece *Board::cell(Pos p) const
 
 void Board::kill(Pos p)
 {
-    Vec &src = myTurn ? myLost : aiLost;
     if (cell(p))
     {
-        auto sym = cell(p)->baseSym;
-        src.emplace_back(sym);
+        lastAtt = cell(p)->baseSym;
     }
 }
 
@@ -66,10 +64,11 @@ void Board::syncPos()
 
 void Board::syncEval()
 {
-    forEachCell([this](Pos p)
+    auto self = shared_from_this();
+    forEachCell([this, self](Pos p)
     {
         auto [r, c] = p;
-        gBoard[r][c].setEval(eval[r][c]);
+        gBoard[r][c].setEval(self, p);
     });
 }
 

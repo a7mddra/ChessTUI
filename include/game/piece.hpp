@@ -1,18 +1,14 @@
 #pragma once
+
 /**
  * @file piece.hpp
  * @brief Piece data structure and canonical piece templates for the terminal chess engine.
  *
- * This header exposes the `Piece` struct used throughout the project to represent
- * board squares and chess pieces. It also declares canonical piece templates
- * (Pawn, Rook, Bishop, Knight, Queen, King, Square) which are defined in
- * `src/piece.cpp`. Use the templates with `Piece::set(...)` to initialize an
- * instance with the template's metadata while applying color/position.
+ * Lightweight POD-like representation of a board square or chess piece and
+ * declarations for canonical templates (Pawn, Rook, Bishop, Knight, Queen, King, Square).
  *
- * Design goals:
- *  - Small, self-contained POD-like struct with helpers (set, setPos, setEval).
- *  - Movement metadata (deltas, isSliding, score) to help move generation & evaluation.
- *  - Clear, minimal dependencies (assets & colors).
+ * Use the canonical templates with `Piece::set(...)` to initialize a runtime
+ * piece instance (this applies color/position to a color-agnostic template).
  *
  * Author: a7mddra
  */
@@ -20,12 +16,21 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <memory>
 
 #include "assets.hpp"
+
 using Pos = std::pair<size_t, size_t>;
 
 class Board;
 
+/**
+ * @enum Identity
+ * @brief Type identity for a Piece.
+ *
+ * Values distinguish pawns, rooks, bishops, knights, queens, kings and
+ * empty board squares (SQUARE).
+ */
 enum Identity
 {
     PAWN,
@@ -38,65 +43,77 @@ enum Identity
 };
 
 /**
- * @brief Lightweight representation of a chess piece or empty square.
+ * @struct Piece
+ * @brief Compact representation for a piece or empty square.
  *
- * Field notes:
- *  - `pos` uses signed ints so sentinel values like -1 are easy.
- *  - `baseSym` stores the unmodified glyph, `sym` stores what should be printed
- *    (e.g. colored or highlighted).
- *  - `deltas` and `isSliding` encode movement semantics useful for `markValid`.
- *  - `score` encodes static piece value (e.g. 1 pawn, 9 queen).
+ * Fields contain display glyphs, runtime flags, movement metadata and a
+ * small evaluation marker used by the renderer and move generator.
+ *
+ * Intended to be small and copyable. Canonical templates supply the
+ * movement metadata and static values (score, deltas, isSliding).
  */
 struct Piece
 {
-    /* Core identity + display */
-    Identity identity = SQUARE;
-    std::string baseSym;
-    std::string sym;
-    Pos pos = {-1, -1};
+    /* identity and display */
+    Identity identity = SQUARE; /**< piece identity (PAWN, ROOK, ... or SQUARE) */
+    std::string baseSym;        /**< glyph for the piece (unmodified) */
+    std::string sym;            /**< glyph to print (may be colored/highlighted) */
+    Pos pos = {-1, -1};         /**< current position (row, col) or {-1,-1} sentinel */
 
-    /* Stateful chess flags */
-    char ch;
-    int eval = 0;
-    bool isMe = false;                       
-    bool isMoved = false;                    
-    bool OO = false, OOO = false;            
+    /* runtime flags and shorthand */
+    char ch;                    /**< ASCII char representing piece type + color (e.g. 'P'/'p') */
+    int eval = 0;               /**< evaluation marker for renderer: 1 valid, -1 attack, 0 normal */
+    bool isMe = false;          /**< true if piece belongs to the current player */
+    bool isMoved = false;       /**< true when the piece has moved (affects castling/pawn logic) */
+    bool OO = false, OOO = false;/**< castling flags (rook/king availability markers) */
 
-    /* Movement metadata */
-    bool isSliding = false;
-    std::vector<std::pair<int,int>> deltas;
+    /* movement metadata */
+    bool isSliding = false;     /**< true if moves slide along deltas (rook/bishop/queen) */
+    std::vector<std::pair<int,int>> deltas; /**< movement deltas used for move generation */
 
-    /* Static material value (fixed per canonical template) */
-    int score = 0;
+    /* static value */
+    int score = 0;              /**< material score (Pawn=1, Knight/Bishop=3, Rook=5, Queen=9, King=inf) */
 
-    /* --------------------- methods --------------------- */
-
+    /* methods */
     Piece() = default;
 
     /**
-     * @brief Initialize this Piece from a template.
+     * @brief Initialize this Piece from a canonical template.
+     * @param ps  position to place the piece (row, col)
+     * @param mine true if this piece belongs to the player using this instance
+     * @param white true if the piece should be rendered as white (affects glyph choice)
+     * @param tpl  canonical template to copy movement metadata and score from
      *
-     * Copies movement metadata and flags from `tpl`, then applies `mine` color
-     * and sets the position `p`. `baseSym` / `sym` pick the correct glyph for color.
+     * Copies deltas, isSliding, score and identity from tpl, sets glyphs according
+     * to `white`, marks ownership using `mine` and sets `pos`.
      */
     void set(Pos ps, bool mine, bool white, const Piece &tpl);
 
     /**
-     * @brief Set evaluation marker for display.
-     * @param v 1 -> valid move (highlight glyph), -1 -> attack (red), 0 -> normal
+     * @brief Update `eval` and `sym` for rendering a valid/attack square.
+     * @param board owning Board (used to read board->eval)
+     * @param p     the position whose eval value to apply
+     *
+     * If eval == 1 the piece will use a highlighted glyph; if eval == -1 it will
+     * show an attack glyph; otherwise it displays baseSym.
      */
-    void setEval(int v);
+    void setEval(std::shared_ptr<Board> board, Pos p);
 
     /**
-     * @brief Set position of the piece.
-     * @param r, c -> row, and col.
+     * @brief Update the stored position.
+     * @param ps new position (row, col)
      */
     void setPos(Pos ps);
 };
 
-/* Canonical templates declared here; definitions live in src/piece.cpp.
- * Each template has its score set once:
- *   Pawn.score = 1, Knight/Bishop = 3, Rook = 5, Queen = 9, King = 1000, Square = 0.
+/**
+ * Canonical piece templates (color-agnostic).
+ *
+ * The templates provide movement metadata and a static score value. Use
+ * Piece::set() with one of these templates to create a colored, positioned
+ * piece instance for the board.
+ *
+ * Scores: Pawn=1, Knight/Bishop=3, Rook=5, Queen=9, King=large, Square=0.
  */
 extern const Piece Pawn;
 extern const Piece Rook;
