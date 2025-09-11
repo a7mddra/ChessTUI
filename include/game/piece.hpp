@@ -101,7 +101,7 @@ struct Piece
 
     /**
      * @brief Update the stored position.
-     * @param ps new position (row, col)
+     * @param ps new position (row, col) 
      */
     void setPos(Pos ps);
 };
