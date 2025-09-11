@@ -184,7 +184,7 @@ std::string parseBestMove(const std::string &fen)
 
     if (bestmove.empty())
     {
-        throw std::runtime_error("no bestmove returned");
+        throw std::runtime_error("err");
     }
     return bestmove;
 }

@@ -22,5 +22,4 @@ namespace console
 class Board;
 size_t padd(const std::string &str);
 size_t utf8Width(const std::string &str);
-void print(const std::vector<std::string> &lines,
-           const char &clr, bool nline);
+void print(const std::vector<std::string> &lines, const char &clr, bool nline);

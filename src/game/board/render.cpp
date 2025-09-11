@@ -66,12 +66,12 @@ void Board::printBoard()
     tplRow += lastAtt;
     pBoard[0] = tplRow;
 
-    for (int r = 0; r < consts::ROWS; ++r)
+    for (size_t r = 0; r < consts::ROWS; ++r)
     {
         vec tokens;
         tokens.reserve(consts::COLS);
 
-        for (int c = 0; c < consts::COLS; ++c)
+        for (size_t c = 0; c < consts::COLS; ++c)
         {
             tokens.push_back(gBoard[r][c].sym);
         }
@@ -79,11 +79,50 @@ void Board::printBoard()
         std::string row;
         int rank = isWhite? consts::ROWS - r : r + 1;
         row += std::to_string(rank);
-        for (int c = 0; c < consts::COLS; ++c)
+        for (size_t c = 0; c < consts::COLS; ++c)
         {
             auto &t = tokens[c];
             auto tg = ((r + c) & 1) != isWhite;
-            t = tg ? color::sq1(t) : color::sq2(t);
+            auto curr = [&](Pos p)
+            {
+                return p.first == r && p.second == c;
+            };
+
+            using CLR = std::function<std::string(std::string)>;
+            auto colorize = [&](CLR c1, CLR c2) -> CLR
+            {
+                return tg ? c1 : c2;
+            };
+
+            auto floor = [&](const std::string& s)
+            {
+                return colorize(color::sq1, color::sq2)(s);
+            };
+
+            auto mark = [&](const std::string& s)
+            {
+                return colorize(color::hsq1, color::hsq2)(s);
+            };
+
+            auto check = [&](const std::string& s)
+            {
+                return colorize(color::rsq1, color::rsq2)(s);
+            };
+
+            if (!isSafe(KK) && curr(KK.pos))
+            {
+                t = check(t);
+            }
+
+            if (curr(ffrom) || curr(tto) || curr(from))
+            {
+                t = mark(t);
+            }
+            else
+            {
+                t = floor(t);
+            }
+
             row += t;
         }
         pBoard[r+1] = row;
@@ -113,9 +152,4 @@ void Board::printCursor()
     }
     cur += cursor;
     std::cout << cur;
-}
-
-void Board::detachLog()
-{
-
 }

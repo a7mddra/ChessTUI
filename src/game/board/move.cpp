@@ -379,6 +379,7 @@ void Board::applyMove(Pos t)
         {
         def:
             makeMove(f, t);
+            tto = t;
             break;
         }
     }

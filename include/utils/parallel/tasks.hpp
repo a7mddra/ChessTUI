@@ -21,9 +21,11 @@ namespace tasks
     inline std::function<void()> makeAI(
         std::shared_ptr<Board> board)
     {
+
+        board->ffrom = {-1, -1};
+        board->myTurn = false;
         board->setState(gst::THINKING);
         board->printBoard();
-        board->myTurn = false;
         auto rev = [&](char r, char f) -> Pos
         {
             int irk = board->isWhite 
@@ -78,6 +80,8 @@ namespace tasks
                 }
                 Pos to = {xt, yt};
                 board->from = {xf, yf};
+                board->ffrom  = {xf, yf};
+                board->tto  = to;
                 board->applyMove(to);
 
                 if (board->totEmpty < tmp)
@@ -94,7 +98,6 @@ namespace tasks
                     board->syncPos();
                 }
 
-                board->from   = {-1, -1};
                 board->kk.OO  = false;
                 board->kk.OOO = false;
                 board->myTurn = true;

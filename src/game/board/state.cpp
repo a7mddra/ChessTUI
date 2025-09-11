@@ -12,7 +12,6 @@ void Board::setState(gst st)
 {
     state = st;
     umarkValid();
-    log = assets::logs[st];
 }
 
 bool Board::insufficientMaterial()

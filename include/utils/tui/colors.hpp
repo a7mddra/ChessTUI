@@ -59,4 +59,23 @@ namespace color
         return "\033[38;2;0;0;0;48;2;124;156;92m" + s + "\033[0m";
     }
 
+    inline std::string hsq1(const std::string &s)
+    {
+        return "\033[38;2;0;0;0;48;2;245;246;130m" + s + "\033[0m";
+    }
+
+    inline std::string hsq2(const std::string &s)
+    {
+        return "\033[38;2;0;0;0;48;2;185;202;67m" + s + "\033[0m";
+    }
+
+    inline std::string rsq1(const std::string &s)
+    {
+        return "\033[38;2;0;0;0;48;2;175;43;45m" + s + "\033[0m";
+    }
+
+    inline std::string rsq2(const std::string &s)
+    {
+        return "\033[38;2;0;0;0;48;2;176;44;44m" + s + "\033[0m";
+    }
 }

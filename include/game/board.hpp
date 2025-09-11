@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <array>    
 #include <memory>
 #include <atomic>
@@ -13,8 +14,9 @@
 #include <iomanip>
 #include <stdexcept>
 #include <algorithm>
-#include <unordered_map>
 #include <optional>
+#include <unordered_map>
+#include <functional>
 
 #include "piece.hpp"
 
@@ -50,10 +52,8 @@ public:
     void applyMove(Pos t);
     void makeMove(Pos f, Pos t);
     
-    Vec log;
     gst state;
     void reState();
-    void detachLog();
     void printBoard();
     void setState(gst st);
     
@@ -71,7 +71,7 @@ public:
     std::atomic<bool> processing;
     bool promoting, isOver, isWhite, myTurn;
 
-    Pos from, to, enpAI;
+    Pos from, to, ffrom, tto, enpAI;
     Piece* cell(Pos p) const;
     std::optional<char> stagedPromo;
     std::unordered_map<char, Piece> promos;

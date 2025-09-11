@@ -11,5 +11,4 @@ namespace assets
 {
     extern std::vector<std::string> frames;
     extern std::unordered_map<char, std::string> pieces;
-    extern std::unordered_map<gst, std::vector<std::string>> logs;
 }

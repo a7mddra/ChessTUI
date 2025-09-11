@@ -73,6 +73,10 @@ void Board::init()
 
     syncPos();
     
+    from     = {-1, -1};
+    to       = {-1, -1};
+    ffrom    = {-1, -1};
+    tto      = {-1, -1};
     enpAI    = {-1, -1};
     enpME    = "-";
     lastAtt  = " "; 
@@ -127,12 +131,6 @@ void Board::processInput()
     if (input == "new")
     {
         init();
-        return;
-    }
-
-    if (input == "fen")
-    {
-        log.assign({genFEN()});
         return;
     }
 
