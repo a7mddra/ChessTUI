@@ -1,7 +1,7 @@
 #include "utils/tui/gnome.hpp"
 
 static std::string exec_capture(const std::string &cmd)
-{
+{ 
     std::array<char, 256> buffer{};
     std::string result;
     FILE *pipe = popen(cmd.c_str(), "r");
