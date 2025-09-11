@@ -319,7 +319,7 @@ void Board::umarkValid()
 }
 
 void Board::calcScore()
-{
+{ 
     int myS=0, aiS=0, val;
     auto sum = [&](int &src)-> void
     {

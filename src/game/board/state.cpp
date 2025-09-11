@@ -9,7 +9,7 @@ bool Board::canMove()
 }
 
 void Board::setState(gst st)
-{
+{ 
     state = st;
     umarkValid();
 }

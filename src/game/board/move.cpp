@@ -398,5 +398,5 @@ void Board::makeMove(Pos f, Pos t)
     pc->isMoved = true;
     pMap[t] = pc;
 
-    syncPos();
+    syncPos(); 
 }

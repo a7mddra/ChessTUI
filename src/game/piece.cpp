@@ -143,7 +143,7 @@ static Piece makeKingTpl()
 }
 
 static Piece makeSquareTpl()
-{
+{ 
     Piece p;
     p.identity = SQUARE;
     p.isMoved = false;

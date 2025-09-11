@@ -12,7 +12,7 @@ void Board::spinner()
     console::saveCursor();
     console::hideCursor();
     while (processing.load())
-    {
+    { 
         {
             cursor = assets::frames[idx];
             cursor = color::blue(cursor);

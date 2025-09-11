@@ -10,7 +10,7 @@ Board::Board()
       isOver(false) {}
 
 void Board::init()
-{
+{ 
     promos = {{'q', Queen}, {'r', Rook}, {'b', Bishop}, {'n', Knight}};
 
     {

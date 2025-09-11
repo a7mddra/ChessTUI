@@ -1,7 +1,7 @@
 #include "game/assets.hpp"
 
 namespace assets
-{
+{ 
     std::vector<std::string> frames = {
        "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
 
